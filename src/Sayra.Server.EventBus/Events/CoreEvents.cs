@@ -10,9 +10,13 @@ public abstract record BaseEvent : IEvent
 
 public record ClientConnectedEvent(string ClientId, string IpAddress) : BaseEvent;
 
+public record ClientDisconnectedEvent(string ClientId) : BaseEvent;
+
 public record ClientAuthenticatedEvent(string ClientId, string PcId, string MacAddress) : BaseEvent;
 
 public record SessionStartedEvent(string SessionId, string PcId) : BaseEvent;
+
+public record SessionUpdatedEvent(string SessionId, string PcId, string Status) : BaseEvent;
 
 public record SessionEndedEvent(string SessionId, string PcId, DateTime EndTime) : BaseEvent;
 
