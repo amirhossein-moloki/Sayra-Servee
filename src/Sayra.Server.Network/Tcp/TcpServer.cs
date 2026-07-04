@@ -2,6 +2,8 @@ using System.Net;
 using System.Net.Sockets;
 using Microsoft.Extensions.Logging;
 using Sayra.Server.Application.Interfaces;
+using Sayra.Server.Authentication;
+using Sayra.Server.Security;
 
 namespace Sayra.Server.Network.Tcp;
 
@@ -9,13 +11,31 @@ public class TcpServer
 {
     private readonly ILogger<TcpServer> _logger;
     private readonly IMessageRouter _messageRouter;
+    private readonly IAuthService _authService;
+    private readonly ISecureMessageValidator _secureMessageValidator;
+    private readonly ISignatureService _signatureService;
+    private readonly IEncryptionService _encryptionService;
+    private readonly Sayra.Server.Session.ISessionManager _sessionManager;
     private readonly int _port;
     private Socket? _listener;
 
-    public TcpServer(ILogger<TcpServer> logger, IMessageRouter messageRouter, int port = 5000)
+    public TcpServer(
+        ILogger<TcpServer> logger,
+        IMessageRouter messageRouter,
+        IAuthService authService,
+        ISecureMessageValidator secureMessageValidator,
+        ISignatureService signatureService,
+        IEncryptionService encryptionService,
+        Sayra.Server.Session.ISessionManager sessionManager,
+        int port = 5000)
     {
         _logger = logger;
         _messageRouter = messageRouter;
+        _authService = authService;
+        _secureMessageValidator = secureMessageValidator;
+        _signatureService = signatureService;
+        _encryptionService = encryptionService;
+        _sessionManager = sessionManager;
         _port = port;
     }
 
@@ -53,7 +73,15 @@ public class TcpServer
 
     private async Task HandleClientAsync(Socket socket)
     {
-        var connection = new ClientConnection(socket, _logger, _messageRouter);
+        var connection = new ClientConnection(
+            socket,
+            _logger,
+            _messageRouter,
+            _authService,
+            _secureMessageValidator,
+            _signatureService,
+            _encryptionService,
+            _sessionManager);
         await connection.ProcessAsync();
     }
 }

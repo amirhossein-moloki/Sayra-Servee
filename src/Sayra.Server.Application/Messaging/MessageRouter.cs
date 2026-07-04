@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Sayra.Server.Application.Interfaces;
 using Sayra.Server.Domain.Entities;
 using Sayra.Server.Domain.Enums;
+using Sayra.Server.Session;
 using Sayra.Server.Shared.Messages;
 
 namespace Sayra.Server.Application.Messaging;
@@ -11,12 +12,27 @@ public class MessageRouter : IMessageRouter
 {
     private readonly ILogger<MessageRouter> _logger;
     private readonly IClientRegistry _clientRegistry;
+    private readonly ISessionManager _sessionManager;
+    private readonly CommandAuthorizer _authorizer;
+    private readonly ISecureMessageDispatcher _dispatcher;
 
-    public MessageRouter(ILogger<MessageRouter> logger, IClientRegistry clientRegistry)
+    public MessageRouter(
+        ILogger<MessageRouter> logger,
+        IClientRegistry clientRegistry,
+        ISessionManager sessionManager,
+        CommandAuthorizer authorizer,
+        ISecureMessageDispatcher dispatcher)
     {
         _logger = logger;
         _clientRegistry = clientRegistry;
+        _sessionManager = sessionManager;
+        _authorizer = authorizer;
+        _dispatcher = dispatcher;
     }
+
+    public Client? GetClient(string clientId) => _clientRegistry.GetById(clientId);
+
+    public void UpdateClient(Client client) => _clientRegistry.AddOrUpdate(client);
 
     public async Task RouteAsync(string rawMessage)
     {
@@ -24,6 +40,12 @@ public class MessageRouter : IMessageRouter
         {
             var baseMessage = JsonSerializer.Deserialize<BaseMessage>(rawMessage, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             if (baseMessage == null) return;
+
+            if (!_authorizer.IsAuthorized(baseMessage))
+            {
+                _logger.LogWarning("Unauthorized message of type {MessageType} from {ClientId}", baseMessage.Type, baseMessage.ClientId);
+                return;
+            }
 
             _logger.LogDebug("Routing message of type {MessageType} from {ClientId}", baseMessage.Type, baseMessage.ClientId);
 
@@ -40,6 +62,9 @@ public class MessageRouter : IMessageRouter
                     break;
                 case "CLIENT_DISCONNECTED":
                     HandleClientDisconnected(rawMessage);
+                    break;
+                case "COMMAND":
+                    await _dispatcher.DispatchAsync(baseMessage);
                     break;
                 default:
                     _logger.LogWarning("Unknown message type: {MessageType}", baseMessage.Type);
