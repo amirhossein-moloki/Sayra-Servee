@@ -1,0 +1,37 @@
+
+SAYRA SERVER ARCHITECTURE - PHASE 1
+==================================
+
++-----------------------------------------------------------------------+
+|                          Sayra.Server.Core                            |
+| (Bootstrap, DI, Host, BackgroundServices: TcpServer, HeartbeatMonitor)|
++-----------------------------------------------------------------------+
+        |                                       |
+        v                                       v
++--------------------------+        +-----------------------------------+
+|   Sayra.Server.Network   |        |    Sayra.Server.Infrastructure    |
+| (Socket, Pipelines, TCP) |        | (In-Memory Registry, Serilog)     |
++--------------------------+        +-----------------------------------+
+        |                                       |
+        +-------------------+-------------------+
+                            |
+                            v
+            +-----------------------------------+
+            |      Sayra.Server.Application     |
+            | (Message Routing, Command Handlers)|
+            +-----------------------------------+
+                            |
+                            v
+            +-----------------------------------+
+            |        Sayra.Server.Domain        |
+            | (Entities: Client, Session, etc.) |
+            +-----------------------------------+
+                            |
+                            v
+            +-----------------------------------+
+            |        Sayra.Server.Shared        |
+            | (DTOs, JSON Message Contracts)    |
+            +-----------------------------------+
+
+Message Flow:
+Client -> Network (TCP/Pipe) -> Router (App) -> Handlers -> Registry (Infra)
