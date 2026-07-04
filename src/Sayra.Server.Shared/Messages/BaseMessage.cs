@@ -8,6 +8,9 @@ namespace Sayra.Server.Shared.Messages;
 [JsonDerivedType(typeof(AuthMessage), typeDiscriminator: "AUTH")]
 [JsonDerivedType(typeof(ClientConnectedMessage), typeDiscriminator: "CLIENT_CONNECTED")]
 [JsonDerivedType(typeof(ClientDisconnectedMessage), typeDiscriminator: "CLIENT_DISCONNECTED")]
+[JsonDerivedType(typeof(AuthChallengeMessage), typeDiscriminator: "AUTH_CHALLENGE")]
+[JsonDerivedType(typeof(AuthResponseMessage), typeDiscriminator: "AUTH_RESPONSE")]
+[JsonDerivedType(typeof(AuthStatusMessage), typeDiscriminator: "AUTH_STATUS")]
 public class BaseMessage
 {
     public string Type { get; set; } = string.Empty;

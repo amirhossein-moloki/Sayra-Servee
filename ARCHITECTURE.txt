@@ -1,37 +1,60 @@
+SAYRA SERVER ARCHITECTURE - PHASE 2 (SECURE)
+===========================================
 
-SAYRA SERVER ARCHITECTURE - PHASE 1
-==================================
-
-+-----------------------------------------------------------------------+
-|                          Sayra.Server.Core                            |
-| (Bootstrap, DI, Host, BackgroundServices: TcpServer, HeartbeatMonitor)|
-+-----------------------------------------------------------------------+
-        |                                       |
-        v                                       v
-+--------------------------+        +-----------------------------------+
-|   Sayra.Server.Network   |        |    Sayra.Server.Infrastructure    |
-| (Socket, Pipelines, TCP) |        | (In-Memory Registry, Serilog)     |
-+--------------------------+        +-----------------------------------+
-        |                                       |
-        +-------------------+-------------------+
++---------------------------------------------------------------------------------------+
+|                                 Sayra.Server.Core                                     |
+| (Bootstrap, DI, Host, BackgroundServices: TcpServer, HeartbeatMonitor)                |
++---------------------------------------------------------------------------------------+
+        |                                       |                               |
+        v                                       v                               v
++--------------------------+        +---------------------------+       +-------------------------------+
+|   Sayra.Server.Network   | <----> | Sayra.Server.Authentication| <---->|    Sayra.Server.Security     |
+| (Socket, Pipelines, TCP) |        | (Handshake, ChallengeGen) |       | (AES-256, HMAC, Validation)   |
++--------------------------+        +---------------------------+       +-------------------------------+
+        |                                       |                               ^
+        +-------------------+-------------------+-------------------------------+
                             |
                             v
             +-----------------------------------+
             |      Sayra.Server.Application     |
-            | (Message Routing, Command Handlers)|
+            | (Message Routing, Authorization)  |
             +-----------------------------------+
-                            |
-                            v
-            +-----------------------------------+
-            |        Sayra.Server.Domain        |
-            | (Entities: Client, Session, etc.) |
-            +-----------------------------------+
-                            |
-                            v
-            +-----------------------------------+
-            |        Sayra.Server.Shared        |
-            | (DTOs, JSON Message Contracts)    |
-            +-----------------------------------+
+                    |               |
+                    v               v
+            +-----------------------+           +-----------------------+
+            |  Sayra.Server.Session | <-------> |  Sayra.Server.Domain  |
+            | (Registry, Lifecycle) |           | (Entities, Enums)     |
+            +-----------------------+           +-----------------------+
+                                                        |
+                                                        v
+                                                +-----------------------+
+                                                |  Sayra.Server.Shared  |
+                                                | (DTOs, JSON Contracts)|
+                                                +-----------------------+
 
-Message Flow:
-Client -> Network (TCP/Pipe) -> Router (App) -> Handlers -> Registry (Infra)
+------------------------------------------------------------
+AUTHENTICATION HANDSHAKE FLOW
+------------------------------------------------------------
+1. Client -> Server: { "type": "AUTH", "clientId": "PC-01" }
+2. Server -> Client: { "type": "AUTH_CHALLENGE", "challenge": "base64_nonce" }
+3. Client -> Server: { "type": "AUTH_RESPONSE", "response": "HMAC(challenge+nonce, MasterKey)", "nonce": "client_nonce" }
+4. Server -> Client: { "type": "AUTH_STATUS", "success": true, "sessionId": "..." }
+
+------------------------------------------------------------
+SECURE MESSAGE FLOW (POST-AUTH)
+------------------------------------------------------------
+1. Client -> Network: SecureEnvelope { payload: Enc(msg), signature: HMAC(payload+ts+nonce), ... }
+2. Network -> Security: Validate(envelope)
+3. Security -> Network: Success/Fail
+4. Network -> Security: Decrypt(payload)
+5. Network -> Application: RouteAsync(decryptedJson)
+6. Application -> Session: IsAuthorized(clientId)
+7. Application -> Handlers: Execute
+
+------------------------------------------------------------
+SESSION LIFECYCLE
+------------------------------------------------------------
+- IDLE: Client connected but not authenticated.
+- ACTIVE: Authenticated, session key active, commands allowed.
+- PAUSED: Connection lost or manual pause, state preserved.
+- ENDED: Explicit logout or timeout, state cleaned up.

@@ -3,6 +3,9 @@
   <ItemGroup>
     <ProjectReference Include="..\Sayra.Server.Network\Sayra.Server.Network.csproj" />
     <ProjectReference Include="..\Sayra.Server.Infrastructure\Sayra.Server.Infrastructure.csproj" />
+    <ProjectReference Include="..\Sayra.Server.Security\Sayra.Server.Security.csproj" />
+    <ProjectReference Include="..\Sayra.Server.Authentication\Sayra.Server.Authentication.csproj" />
+    <ProjectReference Include="..\Sayra.Server.Session\Sayra.Server.Session.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -6,6 +6,9 @@ using Sayra.Server.Application.Messaging;
 using Sayra.Server.Infrastructure.Persistence;
 using Sayra.Server.Infrastructure.BackgroundServices;
 using Sayra.Server.Network.Tcp;
+using Sayra.Server.Security;
+using Sayra.Server.Authentication;
+using Sayra.Server.Session;
 using Serilog;
 
 namespace Sayra.Server.Core;
@@ -41,7 +44,27 @@ public class Program
                 // Infrastructure
                 services.AddSingleton<IClientRegistry, InMemoryClientRegistry>();
 
+                // Options
+                services.Configure<SecurityOptions>(hostContext.Configuration.GetSection("Security"));
+
+                // Security
+                services.AddSingleton<IEncryptionService, EncryptionService>();
+                services.AddSingleton<ISignatureService, SignatureService>();
+                services.AddSingleton<IReplayProtectionService, ReplayProtectionService>();
+                services.AddSingleton<ISecureMessageValidator, SecureMessageValidator>();
+
+                // Authentication
+                services.AddSingleton<IChallengeGenerator, ChallengeGenerator>();
+                services.AddSingleton<IAuthSessionManager, AuthSessionManager>();
+                services.AddSingleton<IAuthService, AuthService>();
+
+                // Session
+                services.AddSingleton<ISessionRegistry, SessionRegistry>();
+                services.AddSingleton<ISessionManager, SessionManager>();
+
                 // Application
+                services.AddSingleton<CommandAuthorizer>();
+                services.AddSingleton<ISecureMessageDispatcher, SecureMessageDispatcher>();
                 services.AddSingleton<IMessageRouter, MessageRouter>();
 
                 // Network
@@ -49,6 +72,11 @@ public class Program
                     new TcpServer(
                         sp.GetRequiredService<ILogger<TcpServer>>(),
                         sp.GetRequiredService<IMessageRouter>(),
+                        sp.GetRequiredService<IAuthService>(),
+                        sp.GetRequiredService<ISecureMessageValidator>(),
+                        sp.GetRequiredService<ISignatureService>(),
+                        sp.GetRequiredService<IEncryptionService>(),
+                        sp.GetRequiredService<ISessionManager>(),
                         5000));
 
                 // Hosted Services

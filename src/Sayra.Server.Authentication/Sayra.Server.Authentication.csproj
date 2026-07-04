@@ -1,14 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\Sayra.Server.Application\Sayra.Server.Application.csproj" />
-    <ProjectReference Include="..\Sayra.Server.Shared\Sayra.Server.Shared.csproj" />
-    <ProjectReference Include="..\Sayra.Server.Authentication\Sayra.Server.Authentication.csproj" />
     <ProjectReference Include="..\Sayra.Server.Security\Sayra.Server.Security.csproj" />
+    <ProjectReference Include="..\Sayra.Server.Shared\Sayra.Server.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.IO.Pipelines" Version="10.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.9" />
   </ItemGroup>
 
   <PropertyGroup>
