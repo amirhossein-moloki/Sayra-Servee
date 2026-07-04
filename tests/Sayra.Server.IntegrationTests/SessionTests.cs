@@ -1,6 +1,8 @@
 using Xunit;
+using Moq;
 using Sayra.Server.Session;
 using Sayra.Server.Domain.Entities;
+using Sayra.Server.EventBus.Interfaces;
 
 namespace Sayra.Server.IntegrationTests;
 
@@ -11,7 +13,8 @@ public class SessionTests
     {
         // Arrange
         var registry = new SessionRegistry();
-        var manager = new SessionManager(registry);
+        var eventPublisher = new Mock<IEventPublisher>().Object;
+        var manager = new SessionManager(registry, eventPublisher);
         string clientId = "PC-01";
         string sessionKey = "key123";
 

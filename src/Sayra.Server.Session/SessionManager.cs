@@ -1,4 +1,6 @@
 using Sayra.Server.Domain.Entities;
+using Sayra.Server.EventBus.Events;
+using Sayra.Server.EventBus.Interfaces;
 
 namespace Sayra.Server.Session;
 
@@ -15,10 +17,12 @@ public interface ISessionManager
 public class SessionManager : ISessionManager
 {
     private readonly ISessionRegistry _sessionRegistry;
+    private readonly IEventPublisher _eventPublisher;
 
-    public SessionManager(ISessionRegistry sessionRegistry)
+    public SessionManager(ISessionRegistry sessionRegistry, IEventPublisher eventPublisher)
     {
         _sessionRegistry = sessionRegistry;
+        _eventPublisher = eventPublisher;
     }
 
     public void CreateSession(string clientId, string sessionKey)
@@ -30,6 +34,8 @@ public class SessionManager : ISessionManager
             StartTime = DateTime.UtcNow
         };
         _sessionRegistry.Add(clientId, session, sessionKey);
+
+        _ = _eventPublisher.PublishAsync(new SessionStartedEvent(session.Id, clientId));
     }
 
     public (Sayra.Server.Domain.Entities.Session? Session, string? SessionKey) GetSession(string clientId)
@@ -39,9 +45,15 @@ public class SessionManager : ISessionManager
 
     public void EndSession(string clientId)
     {
+        var (session, _) = _sessionRegistry.Get(clientId);
         _sessionRegistry.UpdateState(clientId, SessionState.Ended);
         // In a real system, we might keep it for a while before removing
         _sessionRegistry.Remove(clientId);
+
+        if (session != null)
+        {
+            _ = _eventPublisher.PublishAsync(new SessionEndedEvent(session.Id, clientId, DateTime.UtcNow));
+        }
     }
 
     public bool IsSessionActive(string clientId)

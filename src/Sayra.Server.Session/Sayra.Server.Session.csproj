@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Sayra.Server.Domain\Sayra.Server.Domain.csproj" />
     <ProjectReference Include="..\Sayra.Server.Shared\Sayra.Server.Shared.csproj" />
+    <ProjectReference Include="..\Sayra.Server.EventBus\Sayra.Server.EventBus.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

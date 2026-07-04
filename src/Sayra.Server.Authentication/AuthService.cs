@@ -1,4 +1,6 @@
 using Microsoft.Extensions.Options;
+using Sayra.Server.EventBus.Events;
+using Sayra.Server.EventBus.Interfaces;
 using Sayra.Server.Security;
 using Sayra.Server.Shared.Messages;
 
@@ -15,17 +17,20 @@ public class AuthService : IAuthService
     private readonly IChallengeGenerator _challengeGenerator;
     private readonly IAuthSessionManager _authSessionManager;
     private readonly ISignatureService _signatureService;
+    private readonly IEventPublisher _eventPublisher;
     private readonly SecurityOptions _options;
 
     public AuthService(
         IChallengeGenerator challengeGenerator,
         IAuthSessionManager authSessionManager,
         ISignatureService signatureService,
+        IEventPublisher eventPublisher,
         IOptions<SecurityOptions> options)
     {
         _challengeGenerator = challengeGenerator;
         _authSessionManager = authSessionManager;
         _signatureService = signatureService;
+        _eventPublisher = eventPublisher;
         _options = options.Value;
     }
 
@@ -58,6 +63,10 @@ public class AuthService : IAuthService
             _authSessionManager.RemovePendingChallenge(response.ClientId);
             // Derive a session key
             string sessionKey = _signatureService.Sign($"{_options.MasterKey}{response.Nonce}", response.ClientId);
+
+            // Publish authentication event
+            _ = _eventPublisher.PublishAsync(new ClientAuthenticatedEvent(response.ClientId, response.ClientId, "Unknown"));
+
             return (true, sessionKey);
         }
 

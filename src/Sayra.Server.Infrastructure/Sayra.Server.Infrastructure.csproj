@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Sayra.Server.Application\Sayra.Server.Application.csproj" />
+    <ProjectReference Include="..\Sayra.Server.Persistence\Sayra.Server.Persistence.csproj" />
   </ItemGroup>
 
   <ItemGroup>
