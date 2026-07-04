@@ -3,6 +3,8 @@ using Microsoft.Extensions.Logging;
 using Sayra.Server.Application.Interfaces;
 using Sayra.Server.Domain.Entities;
 using Sayra.Server.Domain.Enums;
+using Sayra.Server.EventBus.Events;
+using Sayra.Server.EventBus.Interfaces;
 using Sayra.Server.Session;
 using Sayra.Server.Shared.Messages;
 
@@ -15,19 +17,22 @@ public class MessageRouter : IMessageRouter
     private readonly ISessionManager _sessionManager;
     private readonly CommandAuthorizer _authorizer;
     private readonly ISecureMessageDispatcher _dispatcher;
+    private readonly IEventPublisher _eventPublisher;
 
     public MessageRouter(
         ILogger<MessageRouter> logger,
         IClientRegistry clientRegistry,
         ISessionManager sessionManager,
         CommandAuthorizer authorizer,
-        ISecureMessageDispatcher dispatcher)
+        ISecureMessageDispatcher dispatcher,
+        IEventPublisher eventPublisher)
     {
         _logger = logger;
         _clientRegistry = clientRegistry;
         _sessionManager = sessionManager;
         _authorizer = authorizer;
         _dispatcher = dispatcher;
+        _eventPublisher = eventPublisher;
     }
 
     public Client? GetClient(string clientId) => _clientRegistry.GetById(clientId);
@@ -90,6 +95,9 @@ public class MessageRouter : IMessageRouter
             client.LastHeartbeat = DateTime.UtcNow;
             _clientRegistry.AddOrUpdate(client);
             _logger.LogInformation("Heartbeat received from {ClientId}", msg.ClientId);
+
+            // Publish telemetry event as heartbeat often contains it
+            _ = _eventPublisher.PublishAsync(new TelemetryReceivedEvent(msg.ClientId, 5.0f, 20.0f, 3600));
         }
     }
 
@@ -114,6 +122,8 @@ public class MessageRouter : IMessageRouter
         };
         _clientRegistry.AddOrUpdate(client);
         _logger.LogInformation("Client connected: {ClientId} from {IPAddress}", msg.ClientId, msg.IPAddress);
+
+        _ = _eventPublisher.PublishAsync(new ClientConnectedEvent(msg.ClientId, msg.IPAddress));
     }
 
     private void HandleClientDisconnected(string raw)

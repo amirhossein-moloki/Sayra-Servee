@@ -4,6 +4,8 @@
     <ProjectReference Include="..\Sayra.Server.Domain\Sayra.Server.Domain.csproj" />
     <ProjectReference Include="..\Sayra.Server.Shared\Sayra.Server.Shared.csproj" />
     <ProjectReference Include="..\Sayra.Server.Session\Sayra.Server.Session.csproj" />
+    <ProjectReference Include="..\Sayra.Server.Persistence\Sayra.Server.Persistence.csproj" />
+    <ProjectReference Include="..\Sayra.Server.EventBus\Sayra.Server.EventBus.csproj" />
   </ItemGroup>
 
   <ItemGroup>

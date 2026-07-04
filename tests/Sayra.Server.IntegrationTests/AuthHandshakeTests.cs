@@ -17,8 +17,9 @@ public class AuthHandshakeTests
         var signatureService = new SignatureService();
         var challengeGenerator = new ChallengeGenerator();
         var authSessionManager = new AuthSessionManager();
+        var eventPublisher = new Mock<Sayra.Server.EventBus.Interfaces.IEventPublisher>().Object;
         var options = Microsoft.Extensions.Options.Options.Create(new SecurityOptions());
-        var authService = new AuthService(challengeGenerator, authSessionManager, signatureService, options);
+        var authService = new AuthService(challengeGenerator, authSessionManager, signatureService, eventPublisher, options);
 
         string clientId = "PC-01";
         string masterKey = "SayraMasterKey2024";
@@ -54,8 +55,9 @@ public class AuthHandshakeTests
         var signatureService = new SignatureService();
         var challengeGenerator = new ChallengeGenerator();
         var authSessionManager = new AuthSessionManager();
+        var eventPublisher = new Mock<Sayra.Server.EventBus.Interfaces.IEventPublisher>().Object;
         var options = Microsoft.Extensions.Options.Options.Create(new SecurityOptions());
-        var authService = new AuthService(challengeGenerator, authSessionManager, signatureService, options);
+        var authService = new AuthService(challengeGenerator, authSessionManager, signatureService, eventPublisher, options);
 
         string clientId = "PC-01";
         string wrongMasterKey = "WrongKey";
@@ -90,8 +92,9 @@ public class AuthHandshakeTests
         var signatureService = new SignatureService();
         var challengeGenerator = new ChallengeGenerator();
         var authSessionManager = new AuthSessionManager();
+        var eventPublisher = new Mock<Sayra.Server.EventBus.Interfaces.IEventPublisher>().Object;
         var options = Microsoft.Extensions.Options.Options.Create(new SecurityOptions());
-        var authService = new AuthService(challengeGenerator, authSessionManager, signatureService, options);
+        var authService = new AuthService(challengeGenerator, authSessionManager, signatureService, eventPublisher, options);
         var replayProtection = new ReplayProtectionService();
         var validator = new SecureMessageValidator(signatureService, replayProtection);
 
