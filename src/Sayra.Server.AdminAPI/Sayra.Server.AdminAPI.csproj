@@ -15,6 +15,9 @@
     <ProjectReference Include="..\Sayra.Server.Application\Sayra.Server.Application.csproj" />
     <ProjectReference Include="..\Sayra.Server.Persistence\Sayra.Server.Persistence.csproj" />
     <ProjectReference Include="..\Sayra.Server.Infrastructure\Sayra.Server.Infrastructure.csproj" />
+    <ProjectReference Include="..\Sayra.Server.Realtime\Sayra.Server.Realtime.csproj" />
+    <ProjectReference Include="..\Sayra.Server.Monitoring\Sayra.Server.Monitoring.csproj" />
+    <ProjectReference Include="..\Sayra.Server.ProductionHardening\Sayra.Server.ProductionHardening.csproj" />
   </ItemGroup>
 
 </Project>

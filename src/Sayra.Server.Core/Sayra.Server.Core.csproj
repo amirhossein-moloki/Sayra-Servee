@@ -9,9 +9,14 @@
     <ProjectReference Include="..\Sayra.Server.EventBus\Sayra.Server.EventBus.csproj" />
     <ProjectReference Include="..\Sayra.Server.Persistence\Sayra.Server.Persistence.csproj" />
     <ProjectReference Include="..\Sayra.Server.Application\Sayra.Server.Application.csproj" />
+    <ProjectReference Include="..\Sayra.Server.Realtime\Sayra.Server.Realtime.csproj" />
+    <ProjectReference Include="..\Sayra.Server.Monitoring\Sayra.Server.Monitoring.csproj" />
+    <ProjectReference Include="..\Sayra.Server.Observability\Sayra.Server.Observability.csproj" />
+    <ProjectReference Include="..\Sayra.Server.ProductionHardening\Sayra.Server.ProductionHardening.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.2.11" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.9" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.9" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.9" />
