@@ -1,38 +1,39 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Sayra.Server.Network\Sayra.Server.Network.csproj" />
-    <ProjectReference Include="..\Sayra.Server.Infrastructure\Sayra.Server.Infrastructure.csproj" />
-    <ProjectReference Include="..\Sayra.Server.Security\Sayra.Server.Security.csproj" />
-    <ProjectReference Include="..\Sayra.Server.Authentication\Sayra.Server.Authentication.csproj" />
-    <ProjectReference Include="..\Sayra.Server.Session\Sayra.Server.Session.csproj" />
-    <ProjectReference Include="..\Sayra.Server.EventBus\Sayra.Server.EventBus.csproj" />
-    <ProjectReference Include="..\Sayra.Server.Persistence\Sayra.Server.Persistence.csproj" />
     <ProjectReference Include="..\Sayra.Server.Application\Sayra.Server.Application.csproj" />
+    <ProjectReference Include="..\Sayra.Server.Infrastructure\Sayra.Server.Infrastructure.csproj" />
+    <ProjectReference Include="..\Sayra.Server.Persistence\Sayra.Server.Persistence.csproj" />
     <ProjectReference Include="..\Sayra.Server.Realtime\Sayra.Server.Realtime.csproj" />
     <ProjectReference Include="..\Sayra.Server.Monitoring\Sayra.Server.Monitoring.csproj" />
     <ProjectReference Include="..\Sayra.Server.Observability\Sayra.Server.Observability.csproj" />
-    <ProjectReference Include="..\Sayra.Server.ProductionHardening\Sayra.Server.ProductionHardening.csproj" />
     <ProjectReference Include="..\Sayra.Server.Configuration\Sayra.Server.Configuration.csproj" />
-    <ProjectReference Include="..\Sayra.Server.Deployment\Sayra.Server.Deployment.csproj" />
-    <ProjectReference Include="..\Sayra.Server.UpdateSystem\Sayra.Server.UpdateSystem.csproj" />
     <ProjectReference Include="..\Sayra.Server.Scaling\Sayra.Server.Scaling.csproj" />
     <ProjectReference Include="..\Sayra.Server.BackupRecovery\Sayra.Server.BackupRecovery.csproj" />
+    <ProjectReference Include="..\Sayra.Server.UpdateSystem\Sayra.Server.UpdateSystem.csproj" />
     <ProjectReference Include="..\Sayra.Server.ProductionHardeningFinal\Sayra.Server.ProductionHardeningFinal.csproj" />
+    <ProjectReference Include="..\Sayra.Server.Licensing\Sayra.Server.Licensing.csproj" />
+    <ProjectReference Include="..\Sayra.Server.Billing\Sayra.Server.Billing.csproj" />
+    <ProjectReference Include="..\Sayra.Server.MultiSite\Sayra.Server.MultiSite.csproj" />
+    <ProjectReference Include="..\Sayra.Server.FeatureGating\Sayra.Server.FeatureGating.csproj" />
+    <ProjectReference Include="..\Sayra.Server.SecurityLockdown\Sayra.Server.SecurityLockdown.csproj" />
+    <ProjectReference Include="..\Sayra.Server.Network\Sayra.Server.Network.csproj" />
+    <ProjectReference Include="..\Sayra.Server.Security\Sayra.Server.Security.csproj" />
+    <ProjectReference Include="..\Sayra.Server.Authentication\Sayra.Server.Authentication.csproj" />
+    <ProjectReference Include="..\Sayra.Server.ProductionHardening\Sayra.Server.ProductionHardening.csproj" />
+    <ProjectReference Include="..\Sayra.Server.Deployment\Sayra.Server.Deployment.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.2.11" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.9" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.9" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.9" />
+    <None Update="license.lic">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
-
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
 
 </Project>

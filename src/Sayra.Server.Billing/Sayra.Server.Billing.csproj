@@ -7,13 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Sayra.Server.MultiSite\Sayra.Server.MultiSite.csproj" />
+    <ProjectReference Include="..\Sayra.Server.Persistence\Sayra.Server.Persistence.csproj" />
+    <ProjectReference Include="..\Sayra.Server.Application\Sayra.Server.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
   </ItemGroup>
 
 </Project>

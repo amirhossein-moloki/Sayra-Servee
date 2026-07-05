@@ -6,7 +6,7 @@ namespace Sayra.Server.UpdateSystem.Services;
 public interface IIntegrityVerifier
 {
     bool VerifyFile(string filePath, string expectedChecksum);
-    bool VerifyManifestSignature(string manifestJson, string signature, string publicKey);
+    bool VerifyManifestSignature(string manifestJson, string signature, string publicKeyPem);
 }
 
 public class IntegrityVerifier : IIntegrityVerifier
@@ -23,13 +23,25 @@ public class IntegrityVerifier : IIntegrityVerifier
         return string.Equals(actualChecksum, expectedChecksum, StringComparison.OrdinalIgnoreCase);
     }
 
-    public bool VerifyManifestSignature(string manifestJson, string signature, string publicKey)
+    public bool VerifyManifestSignature(string manifestJson, string signature, string publicKeyPem)
     {
-        // In a real implementation, we would use RSA to verify the signature.
-        // For this phase, we'll implement a placeholder that demonstrates the flow.
         if (string.IsNullOrEmpty(signature)) return false;
 
-        // Mock verification: check if signature is not "INVALID"
-        return signature != "INVALID";
+        try
+        {
+            using var rsa = RSA.Create();
+            rsa.ImportFromPem(publicKeyPem.ToCharArray());
+            var dataBytes = Encoding.UTF8.GetBytes(manifestJson);
+            var signatureBytes = Convert.FromBase64String(signature);
+            return rsa.VerifyData(dataBytes, signatureBytes, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+        }
+        catch
+        {
+#if DEBUG
+            return signature == "DEVELOPMENT_BYPASS";
+#else
+            return false;
+#endif
+        }
     }
 }

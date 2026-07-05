@@ -27,9 +27,16 @@ using Sayra.Server.Configuration;
 using Sayra.Server.Configuration.Models;
 using Sayra.Server.Deployment;
 using Sayra.Server.UpdateSystem.Services;
+using Sayra.Server.UpdateSystem.Workflow;
 using Sayra.Server.Scaling;
 using Sayra.Server.BackupRecovery.Services;
 using Sayra.Server.ProductionHardeningFinal.Logging;
+using Sayra.Server.Licensing.Services;
+using Sayra.Server.Licensing.Models;
+using Sayra.Server.Billing.Services;
+using Sayra.Server.MultiSite.Interfaces;
+using Sayra.Server.FeatureGating.Services;
+using Sayra.Server.SecurityLockdown.Services;
 using Microsoft.Extensions.Options;
 using Serilog;
 
@@ -43,8 +50,29 @@ public class Program
 
         try
         {
-            Log.Information("Starting Sayra Server Phase 5 (Production Ready)...");
-            CreateHostBuilder(args).Build().Run();
+            Log.Information("Starting Sayra Server Phase 6 (Enterprise LAN Edition)...");
+
+            // --- Phase 6: Secure Boot & License Validation ---
+            var licenseService = new LicenseService(new HardwareFingerprintService());
+            var integrityGuard = new IntegrityGuard();
+
+            if (integrityGuard.IsDebuggerAttached())
+            {
+                Log.Fatal("Debugger detected! Security lockdown active.");
+                return;
+            }
+
+            if (!licenseService.ValidateLicense("license.lic", out var licenseInfo))
+            {
+                Log.Fatal("NO VALID LICENSE FOUND. Server cannot start.");
+                Log.Information("Hardware Request Code: {Request}", licenseService.GenerateLicenseRequest());
+                return;
+            }
+
+            Log.Information("License Validated: {Tier} for {IssuedTo} (Expires: {Expiry})",
+                licenseInfo?.Tier, licenseInfo?.IssuedTo, licenseInfo?.ExpiryDate);
+
+            CreateHostBuilder(args, licenseInfo!).Build().Run();
         }
         catch (Exception ex)
         {
@@ -56,17 +84,29 @@ public class Program
         }
     }
 
-    public static IHostBuilder CreateHostBuilder(string[] args) =>
+    public static IHostBuilder CreateHostBuilder(string[] args, LicenseInfo license) =>
         Host.CreateDefaultBuilder(args)
             .UseSerilog()
             .ConfigureServiceHost()
             .ConfigureServices((hostContext, services) =>
             {
+                // Phase 6: Enterprise Modules
+                services.AddSingleton(license);
+                services.AddSingleton<IHardwareFingerprintService, HardwareFingerprintService>();
+                services.AddSingleton<ILicenseService, LicenseService>();
+                services.AddSingleton<IBillingEngine, BillingEngine>();
+                services.AddSingleton<IInvoiceService, InvoiceService>();
+                services.AddScoped<ISiteContext, SiteContext>();
+                services.AddSingleton<IFeatureManager>(sp => new FeatureManager(license.Tier));
+                services.AddSingleton<IIntegrityGuard, IntegrityGuard>();
+                services.AddSingleton<IAuditLogger, SecureAuditLogger>();
+
                 // Phase 5: Configuration
                 services.AddSayraConfiguration(hostContext.Configuration);
                 // Persistence
-                services.AddDbContext<SayraDbContext>(options =>
+                services.AddDbContextFactory<SayraDbContext>(options =>
                     options.UseSqlServer(hostContext.Configuration.GetConnectionString("DefaultConnection")));
+                services.AddDbContext<SayraDbContext>();
 
                 // Event Bus
                 var eventBus = new InMemoryEventBus();
@@ -103,7 +143,12 @@ public class Program
                 // Phase 5: Update System
                 services.AddSingleton<IIntegrityVerifier, IntegrityVerifier>();
                 services.AddSingleton<VersionChecker>(sp => new VersionChecker("1.0.0"));
-                services.AddSingleton<UpdateDistributor>(sp => new UpdateDistributor("./updates"));
+                services.AddSingleton<IUpdateDistributor, UpdateDistributor>();
+                services.AddSingleton<UpdateProcessor>(sp => new UpdateProcessor(
+                    sp.GetRequiredService<VersionChecker>(),
+                    sp.GetRequiredService<IIntegrityVerifier>(),
+                    sp.GetRequiredService<IUpdateDistributor>(),
+                    "<RSA_PEM_KEY>"));
 
                 // Phase 5: Backup & Recovery
                 services.AddSingleton<RestoreManager>();

@@ -2,28 +2,23 @@ using Sayra.Server.UpdateSystem.Models;
 
 namespace Sayra.Server.UpdateSystem.Services;
 
-public class UpdateDistributor
+public interface IUpdateDistributor
 {
-    private readonly string _updateStoragePath;
+    Task<string> GetLocalUpdatePackageAsync(string sourcePath);
+}
 
-    public UpdateDistributor(string updateStoragePath)
+public class UpdateDistributor : IUpdateDistributor
+{
+    public async Task<string> GetLocalUpdatePackageAsync(string sourcePath)
     {
-        _updateStoragePath = updateStoragePath;
-    }
+        // For offline update, we simply copy from USB/Local path to a temp staging area
+        if (!File.Exists(sourcePath))
+            throw new FileNotFoundException("Update package not found", sourcePath);
 
-    public async Task<string> PrepareUpdatePackageAsync(UpdateManifest manifest)
-    {
-        // Logic to bundle files for distribution
-        string packagePath = Path.Combine(_updateStoragePath, $"update-{manifest.Version}.zip");
-        // In reality, we would use ZipFile.CreateFromDirectory or similar
-        return await Task.FromResult(packagePath);
-    }
+        var stagingPath = Path.Combine(Path.GetTempPath(), "SayraUpdate", Path.GetFileName(sourcePath));
+        Directory.CreateDirectory(Path.GetDirectoryName(stagingPath)!);
 
-    public async Task<byte[]> GetUpdateFileAsync(string fileName)
-    {
-        string filePath = Path.Combine(_updateStoragePath, fileName);
-        if (!File.Exists(filePath)) return Array.Empty<byte>();
-
-        return await File.ReadAllBytesAsync(filePath);
+        File.Copy(sourcePath, stagingPath, true);
+        return stagingPath;
     }
 }
