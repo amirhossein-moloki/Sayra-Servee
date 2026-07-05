@@ -1,12 +1,16 @@
 using Microsoft.EntityFrameworkCore;
 using Sayra.Server.Persistence.Entities;
+using Sayra.Server.MultiSite.Interfaces;
 
 namespace Sayra.Server.Persistence;
 
 public class SayraDbContext : DbContext
 {
-    public SayraDbContext(DbContextOptions<SayraDbContext> options) : base(options)
+    private readonly ISiteContext? _siteContext;
+
+    public SayraDbContext(DbContextOptions<SayraDbContext> options, ISiteContext? siteContext = null) : base(options)
     {
+        _siteContext = siteContext;
     }
 
     public DbSet<ClientEntity> Clients => Set<ClientEntity>();
@@ -19,10 +23,13 @@ public class SayraDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+        var currentSiteId = _siteContext?.CurrentSiteId;
+
         modelBuilder.Entity<ClientEntity>(entity =>
         {
             entity.HasKey(e => e.PcId);
             entity.Property(e => e.MacAddress).IsRequired();
+            entity.HasQueryFilter(e => _siteContext == null || e.SiteId == _siteContext.CurrentSiteId);
         });
 
         modelBuilder.Entity<SessionEntity>(entity =>
@@ -31,16 +38,19 @@ public class SayraDbContext : DbContext
             entity.HasOne(e => e.Client)
                 .WithMany()
                 .HasForeignKey(e => e.PcId);
+            entity.HasQueryFilter(e => _siteContext == null || e.SiteId == _siteContext.CurrentSiteId);
         });
 
         modelBuilder.Entity<CommandAuditEntity>(entity =>
         {
             entity.HasKey(e => e.CommandId);
+            entity.HasQueryFilter(e => _siteContext == null || e.SiteId == _siteContext.CurrentSiteId);
         });
 
         modelBuilder.Entity<TelemetryEntity>(entity =>
         {
             entity.HasKey(e => e.Id);
+            entity.HasQueryFilter(e => _siteContext == null || e.SiteId == _siteContext.CurrentSiteId);
         });
 
         modelBuilder.Entity<AdminUserEntity>(entity =>
