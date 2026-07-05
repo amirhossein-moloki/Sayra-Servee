@@ -23,6 +23,14 @@ using Sayra.Server.Monitoring.Services;
 using Sayra.Server.Realtime;
 using Sayra.Server.Realtime.Hubs;
 using Sayra.Server.ProductionHardening.CircuitBreaker;
+using Sayra.Server.Configuration;
+using Sayra.Server.Configuration.Models;
+using Sayra.Server.Deployment;
+using Sayra.Server.UpdateSystem.Services;
+using Sayra.Server.Scaling;
+using Sayra.Server.BackupRecovery.Services;
+using Sayra.Server.ProductionHardeningFinal.Logging;
+using Microsoft.Extensions.Options;
 using Serilog;
 
 namespace Sayra.Server.Core;
@@ -35,7 +43,7 @@ public class Program
 
         try
         {
-            Log.Information("Starting Sayra Server Phase 4...");
+            Log.Information("Starting Sayra Server Phase 5 (Production Ready)...");
             CreateHostBuilder(args).Build().Run();
         }
         catch (Exception ex)
@@ -51,8 +59,11 @@ public class Program
     public static IHostBuilder CreateHostBuilder(string[] args) =>
         Host.CreateDefaultBuilder(args)
             .UseSerilog()
+            .ConfigureServiceHost()
             .ConfigureServices((hostContext, services) =>
             {
+                // Phase 5: Configuration
+                services.AddSayraConfiguration(hostContext.Configuration);
                 // Persistence
                 services.AddDbContext<SayraDbContext>(options =>
                     options.UseSqlServer(hostContext.Configuration.GetConnectionString("DefaultConnection")));
@@ -89,6 +100,19 @@ public class Program
                 services.AddSingleton<MonitoringEventHandler>();
                 services.AddSingleton<RealtimeEventHandler>();
 
+                // Phase 5: Update System
+                services.AddSingleton<IIntegrityVerifier, IntegrityVerifier>();
+                services.AddSingleton<VersionChecker>(sp => new VersionChecker("1.0.0"));
+                services.AddSingleton<UpdateDistributor>(sp => new UpdateDistributor("./updates"));
+
+                // Phase 5: Backup & Recovery
+                services.AddSingleton<RestoreManager>();
+                services.AddHostedService<DatabaseBackupService>();
+                services.AddHostedService<SessionStateSnapshotService>();
+
+                // Phase 5: Final Hardening
+                services.AddSingleton<ImmutableAuditLogger>();
+
                 // Options
                 services.Configure<SecurityOptions>(hostContext.Configuration.GetSection("Security"));
 
@@ -116,7 +140,14 @@ public class Program
                 services.AddHostedService<EventHandlerInitializer>();
 
                 // SignalR
-                services.AddSignalR();
+                var signalRBuilder = services.AddSignalR();
+
+                // Phase 5: Scaling (Redis)
+                var sayraConfig = hostContext.Configuration.GetSection(SayraConfig.SectionName).Get<SayraConfig>();
+                if (sayraConfig?.Scaling?.EnableRedis == true)
+                {
+                    signalRBuilder.AddRedisScaling(sayraConfig.Scaling.RedisConnectionString);
+                }
 
                 // Network
                 services.AddSingleton<TcpServer>(sp =>
@@ -157,7 +188,7 @@ public class ServerWorker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("Sayra Core Engine is running (Phase 4 Active)...");
+        _logger.LogInformation("Sayra Core Engine is running (Phase 5 Active - Production Ready)...");
         await _tcpServer.StartAsync(stoppingToken);
     }
 }

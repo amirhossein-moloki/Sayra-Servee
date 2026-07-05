@@ -13,6 +13,12 @@
     <ProjectReference Include="..\Sayra.Server.Monitoring\Sayra.Server.Monitoring.csproj" />
     <ProjectReference Include="..\Sayra.Server.Observability\Sayra.Server.Observability.csproj" />
     <ProjectReference Include="..\Sayra.Server.ProductionHardening\Sayra.Server.ProductionHardening.csproj" />
+    <ProjectReference Include="..\Sayra.Server.Configuration\Sayra.Server.Configuration.csproj" />
+    <ProjectReference Include="..\Sayra.Server.Deployment\Sayra.Server.Deployment.csproj" />
+    <ProjectReference Include="..\Sayra.Server.UpdateSystem\Sayra.Server.UpdateSystem.csproj" />
+    <ProjectReference Include="..\Sayra.Server.Scaling\Sayra.Server.Scaling.csproj" />
+    <ProjectReference Include="..\Sayra.Server.BackupRecovery\Sayra.Server.BackupRecovery.csproj" />
+    <ProjectReference Include="..\Sayra.Server.ProductionHardeningFinal\Sayra.Server.ProductionHardeningFinal.csproj" />
   </ItemGroup>
 
   <ItemGroup>
