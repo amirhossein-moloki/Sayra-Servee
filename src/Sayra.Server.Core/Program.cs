@@ -29,6 +29,7 @@ using Sayra.Server.Deployment;
 using Sayra.Server.UpdateSystem.Services;
 using Sayra.Server.UpdateSystem.Workflow;
 using Sayra.Server.Scaling;
+using Sayra.Server.Discovery;
 using Sayra.Server.BackupRecovery.Services;
 using Sayra.Server.ProductionHardeningFinal.Logging;
 using Sayra.Server.Licensing.Services;
@@ -209,6 +210,7 @@ public class Program
                 // Hosted Services
                 services.AddHostedService<ServerWorker>();
                 services.AddHostedService<HeartbeatMonitorService>();
+                services.AddHostedService<DiscoveryService>();
             });
 }
 

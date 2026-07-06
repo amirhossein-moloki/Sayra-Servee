@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Sayra.Server.Shared\Sayra.Server.Shared.csproj" />
+    <ProjectReference Include="..\Sayra.Server.Security\Sayra.Server.Security.csproj" />
+    <ProjectReference Include="..\Sayra.Server.Configuration\Sayra.Server.Configuration.csproj" />
+    <ProjectReference Include="..\Sayra.Server.Observability\Sayra.Server.Observability.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+  </ItemGroup>
+
+</Project>
