@@ -4,57 +4,47 @@ namespace Sayra.Server.Security;
 
 public interface IReplayProtectionService
 {
-    bool IsValid(string clientId, string nonce, long timestamp);
+    bool IsValid(string signature, DateTime timestamp);
 }
 
 public class ReplayProtectionService : IReplayProtectionService
 {
-    private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, long>> _usedNonces = new();
+    private readonly ConcurrentDictionary<string, DateTime> _seenSignatures = new();
     private const int MaxTimestampDriftSeconds = 10;
-    private const int CleanupIntervalSeconds = 60;
-    private long _lastCleanup = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+    private DateTime _lastCleanup = DateTime.UtcNow;
 
-    public bool IsValid(string clientId, string nonce, long timestamp)
+    public bool IsValid(string signature, DateTime timestamp)
     {
-        long currentTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        if (Math.Abs(currentTimestamp - timestamp) > MaxTimestampDriftSeconds)
+        DateTime currentTimestamp = DateTime.UtcNow;
+        if (Math.Abs((currentTimestamp - timestamp).TotalSeconds) > MaxTimestampDriftSeconds)
         {
             return false;
         }
 
-        var clientNonces = _usedNonces.GetOrAdd(clientId, _ => new ConcurrentDictionary<string, long>());
-
-        if (!clientNonces.TryAdd(nonce, timestamp))
+        if (!_seenSignatures.TryAdd(signature, timestamp))
         {
             return false;
         }
 
         CleanupIfNeeded(currentTimestamp);
-
         return true;
     }
 
-    private void CleanupIfNeeded(long currentTimestamp)
+    private void CleanupIfNeeded(DateTime currentTimestamp)
     {
-        if (currentTimestamp - _lastCleanup < CleanupIntervalSeconds) return;
+        if ((currentTimestamp - _lastCleanup).TotalSeconds < 60) return;
 
         _lastCleanup = currentTimestamp;
         Task.Run(() =>
         {
-            foreach (var clientPair in _usedNonces)
+            var expired = _seenSignatures.Where(kvp =>
+                (currentTimestamp - kvp.Value).TotalSeconds > MaxTimestampDriftSeconds * 2)
+                .Select(kvp => kvp.Key)
+                .ToList();
+
+            foreach (var key in expired)
             {
-                var nonces = clientPair.Value;
-                foreach (var noncePair in nonces)
-                {
-                    if (currentTimestamp - noncePair.Value > MaxTimestampDriftSeconds * 2)
-                    {
-                        nonces.TryRemove(noncePair.Key, out _);
-                    }
-                }
-                if (nonces.IsEmpty)
-                {
-                    _usedNonces.TryRemove(clientPair.Key, out _);
-                }
+                _seenSignatures.TryRemove(key, out _);
             }
         });
     }

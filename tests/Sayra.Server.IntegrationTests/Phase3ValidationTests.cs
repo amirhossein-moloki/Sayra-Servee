@@ -44,15 +44,15 @@ public class Phase3ValidationTests
             var challengeMsg = authService.InitiateHandshake(clientId);
 
             // 2. Client Response
-            string clientNonce = Guid.NewGuid().ToString();
-            string dataToSign = $"{challengeMsg.Challenge}{clientNonce}";
+            string clientSessionKey = Guid.NewGuid().ToString();
+            string dataToSign = challengeMsg.Challenge;
             string clientResponse = signatureService.Sign(dataToSign, masterKey);
 
             var responseMsg = new AuthResponseMessage
             {
                 ClientId = clientId,
                 Response = clientResponse,
-                Nonce = clientNonce
+                SessionKey = clientSessionKey
             };
 
             // 3. Authenticate

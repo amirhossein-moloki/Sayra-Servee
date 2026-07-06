@@ -36,15 +36,15 @@ public class StressTests
             var challengeMsg = authService.InitiateHandshake(clientId);
 
             // Response
-            string clientNonce = Guid.NewGuid().ToString();
-            string dataToSign = $"{challengeMsg.Challenge}{clientNonce}";
+            string clientSessionKey = Guid.NewGuid().ToString();
+            string dataToSign = challengeMsg.Challenge;
             string clientResponse = signatureService.Sign(dataToSign, masterKey);
 
             var responseMsg = new AuthResponseMessage
             {
                 ClientId = clientId,
                 Response = clientResponse,
-                Nonce = clientNonce
+                SessionKey = clientSessionKey
             };
 
             var (success, sessionKey) = authService.Authenticate(responseMsg);

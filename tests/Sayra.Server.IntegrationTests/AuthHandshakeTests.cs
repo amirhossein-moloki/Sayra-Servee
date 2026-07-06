@@ -29,15 +29,15 @@ public class AuthHandshakeTests
         Assert.NotNull(challengeMsg.Challenge);
 
         // 2. Client Side: Generate response
-        string clientNonce = Convert.ToBase64String(RandomNumberGenerator.GetBytes(16));
-        string dataToSign = $"{challengeMsg.Challenge}{clientNonce}";
+        string clientSessionKey = Convert.ToBase64String(RandomNumberGenerator.GetBytes(16));
+        string dataToSign = challengeMsg.Challenge;
         string clientResponse = signatureService.Sign(dataToSign, masterKey);
 
         var responseMsg = new AuthResponseMessage
         {
             ClientId = clientId,
             Response = clientResponse,
-            Nonce = clientNonce
+            SessionKey = clientSessionKey
         };
 
         // 3. Server Side: Authenticate
@@ -66,15 +66,15 @@ public class AuthHandshakeTests
         var challengeMsg = authService.InitiateHandshake(clientId);
 
         // 2. Client Side: Generate response with WRONG key
-        string clientNonce = Convert.ToBase64String(RandomNumberGenerator.GetBytes(16));
-        string dataToSign = $"{challengeMsg.Challenge}{clientNonce}";
+        string clientSessionKey = Convert.ToBase64String(RandomNumberGenerator.GetBytes(16));
+        string dataToSign = challengeMsg.Challenge;
         string clientResponse = signatureService.Sign(dataToSign, wrongMasterKey);
 
         var responseMsg = new AuthResponseMessage
         {
             ClientId = clientId,
             Response = clientResponse,
-            Nonce = clientNonce
+            SessionKey = clientSessionKey
         };
 
         // 3. Server Side: Authenticate
@@ -102,28 +102,36 @@ public class AuthHandshakeTests
         string masterKey = "SayraMasterKey2024";
 
         var challengeMsg = authService.InitiateHandshake(clientId);
-        string clientNonce = "nonce123";
-        string dataToSign = $"{challengeMsg.Challenge}{clientNonce}";
+        string clientSessionKey = "dummy-session-key";
+        string dataToSign = challengeMsg.Challenge;
         string clientResponse = signatureService.Sign(dataToSign, masterKey);
 
-        var responseMsg = new AuthResponseMessage { ClientId = clientId, Response = clientResponse, Nonce = clientNonce };
+        var responseMsg = new AuthResponseMessage { ClientId = clientId, Response = clientResponse, SessionKey = clientSessionKey };
         var (success, sessionKey) = authService.Authenticate(responseMsg);
         Assert.True(success);
 
         // Act & Assert
+        var timestamp = DateTime.UtcNow;
         var envelope = new SecureEnvelope
         {
-            ClientId = clientId,
-            Nonce = "nonce123",
-            Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+            Timestamp = timestamp,
             Payload = "EncryptedData",
-            Signature = signatureService.Sign($"EncryptedData:{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}:nonce123:{clientId}", sessionKey)
+            Signature = signatureService.Sign($"EncryptedData:{timestamp:O}", sessionKey)
         };
 
         // First use is valid
         Assert.True(validator.Validate(envelope, sessionKey));
 
-        // Second use (replay) should fail
+        // Replay within 10s should now fail because we track signatures
         Assert.False(validator.Validate(envelope, sessionKey));
+
+        // Replay with old timestamp should fail
+        var oldEnvelope = new SecureEnvelope
+        {
+            Timestamp = DateTime.UtcNow.AddMinutes(-5),
+            Payload = "EncryptedData",
+            Signature = signatureService.Sign($"EncryptedData:{DateTime.UtcNow.AddMinutes(-5):O}", sessionKey)
+        };
+        Assert.False(validator.Validate(oldEnvelope, sessionKey));
     }
 }

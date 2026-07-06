@@ -54,15 +54,15 @@ public class AuthService : IAuthService
             return (false, string.Empty);
         }
 
-        // Expected response is HMAC(challenge + nonce, masterKey)
-        string dataToVerify = $"{pendingChallenge}{response.Nonce}";
+        // Expected response is HMAC(challenge, MasterKey) as per OpenAPI
+        string dataToVerify = pendingChallenge;
         bool isValid = _signatureService.Verify(dataToVerify, response.Response, _options.MasterKey);
 
         if (isValid)
         {
             _authSessionManager.RemovePendingChallenge(response.ClientId);
-            // Derive a session key
-            string sessionKey = _signatureService.Sign($"{_options.MasterKey}{response.Nonce}", response.ClientId);
+            // Use the session key provided by the client (decrypted with MasterKey in a real implementation)
+            string sessionKey = response.SessionKey;
 
             // Publish authentication event
             _ = _eventPublisher.PublishAsync(new ClientAuthenticatedEvent(response.ClientId, response.ClientId, "Unknown"));

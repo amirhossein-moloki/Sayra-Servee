@@ -7,6 +7,16 @@ using Sayra.Server.Realtime.Hubs;
 using Sayra.Server.ProductionHardening.Middleware;
 using Sayra.Server.ProductionHardening.CircuitBreaker;
 using Sayra.Server.Observability;
+using Sayra.Server.Authentication;
+using Sayra.Server.Billing.Services;
+using Sayra.Server.Licensing.Services;
+using Sayra.Server.Configuration.Models;
+using Sayra.Server.UpdateSystem.Services;
+using Sayra.Server.Session;
+using Sayra.Server.Security;
+using Sayra.Server.EventBus.Interfaces;
+using Sayra.Server.EventBus;
+using Sayra.Server.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
@@ -45,6 +55,26 @@ builder.Services.AddScoped<ICommandRepository, CommandRepositoryDecorator>(sp =>
 // NOTE: In Phase 5, these should be backed by a distributed store (Redis) if Core and API are separate processes.
 builder.Services.AddSingleton<IMetricsService, MetricsAggregator>();
 builder.Services.AddSingleton<IAlertService, AlertService>();
+
+// Module Services
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IChallengeGenerator, ChallengeGenerator>();
+builder.Services.AddSingleton<IAuthSessionManager, AuthSessionManager>();
+builder.Services.AddSingleton<ISignatureService, SignatureService>();
+builder.Services.AddSingleton<IEventPublisher, InMemoryEventBus>();
+builder.Services.AddScoped<BillingEngine>();
+builder.Services.AddScoped<InvoiceService>();
+builder.Services.AddScoped<LicenseService>();
+builder.Services.AddScoped<UpdateDistributor>();
+builder.Services.AddSingleton<SessionManager>();
+builder.Services.AddSingleton<IClientRegistry, InMemoryClientRegistry>();
+builder.Services.AddSingleton<ISessionRegistry, SessionRegistry>();
+builder.Services.AddSingleton<IHardwareFingerprintService, HardwareFingerprintService>();
+
+// Configuration
+builder.Services.Configure<SayraConfig>(builder.Configuration.GetSection("SayraConfig"));
+builder.Services.Configure<SecurityOptions>(builder.Configuration.GetSection("Security"));
 
 var app = builder.Build();
 

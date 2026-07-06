@@ -166,16 +166,15 @@ public class ClientConnection
                     var sessionData = _sessionManager.GetSession(_clientId!);
                     await SendMessageAsync(new AuthStatusMessage
                     {
-                        Success = true,
+                        Status = "SUCCESS",
                         Message = "Authenticated",
-                        SessionId = sessionData.Session?.Id ?? Guid.NewGuid().ToString(),
                         ClientId = _clientId!
                     });
                     _logger.LogInformation("Client {ClientId} authenticated successfully and session created", _clientId);
                 }
                 else
                 {
-                    await SendMessageAsync(new AuthStatusMessage { Success = false, Message = "Authentication failed", ClientId = _clientId ?? "Unknown" });
+                    await SendMessageAsync(new AuthStatusMessage { Status = "FAILED", Message = "Authentication failed", ClientId = _clientId ?? "Unknown" });
                     _logger.LogWarning("Authentication failed for {EndPoint}", RemoteEndPoint);
                     Disconnect();
                 }
@@ -224,16 +223,13 @@ public class ClientConnection
         {
             var payloadJson = JsonSerializer.Serialize(message);
             var encryptedPayload = _encryptionService.Encrypt(payloadJson, _sessionKey);
-            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-            var nonce = Guid.NewGuid().ToString();
+            var timestamp = DateTime.UtcNow;
 
             var envelope = new SecureEnvelope
             {
                 Payload = encryptedPayload,
                 Timestamp = timestamp,
-                Nonce = nonce,
-                ClientId = _clientId ?? "Unknown",
-                Signature = _signatureService.Sign($"{encryptedPayload}:{timestamp}:{nonce}:{_clientId}", _sessionKey)
+                Signature = _signatureService.Sign($"{encryptedPayload}:{timestamp:O}", _sessionKey)
             };
             json = JsonSerializer.Serialize(envelope);
         }
