@@ -26,6 +26,8 @@ tags:
     description: System settings and feature flags
   - name: Licensing
     description: License validation and status
+  - name: Updates
+    description: System update management
 
 paths:
   /auth/login:
@@ -106,6 +108,29 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ClientResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /clients/{pcId}/status:
+    get:
+      tags:
+        - Clients
+      summary: Get detailed client status
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: pcId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Detailed client status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientStateDto'
         '404':
           $ref: '#/components/responses/NotFoundError'
 
@@ -514,6 +539,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/LicenseStatusResponse'
 
+  /updates/manifest:
+    get:
+      tags:
+        - Updates
+      summary: Get the latest update manifest
+      responses:
+        '200':
+          description: Current update manifest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateManifest'
+
 components:
   securitySchemes:
     BearerAuth:
@@ -644,7 +682,8 @@ components:
           type: string
           enum: [Pending, Sent, Executed, Failed]
         result:
-          type: string
+          type: object
+          nullable: true
         timestamp:
           type: string
           format: date-time
@@ -820,6 +859,58 @@ components:
           type: string
         issuedTo:
           type: string
+
+    UpdateManifest:
+      type: object
+      required:
+        - version
+        - packageUrl
+        - checksum
+      properties:
+        version:
+          type: string
+        releaseNotes:
+          type: string
+          nullable: true
+        packageUrl:
+          type: string
+        checksum:
+          type: string
+        signature:
+          type: string
+          nullable: true
+
+    ClientStateDto:
+      type: object
+      properties:
+        coreState:
+          type: string
+        sessionStatus:
+          type: string
+        remainingTime:
+          type: string
+          nullable: true
+        startTime:
+          type: string
+          format: date-time
+          nullable: true
+        elapsedSeconds:
+          type: number
+          nullable: true
+        totalDurationMinutes:
+          type: number
+          nullable: true
+        ratePerHour:
+          type: number
+          nullable: true
+        currentCost:
+          type: number
+          nullable: true
+        userName:
+          type: string
+          nullable: true
+        isKioskLocked:
+          type: boolean
 
     ErrorResponse:
       type: object
