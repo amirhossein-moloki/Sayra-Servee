@@ -20,12 +20,12 @@ public class SecureMessageValidator : ISecureMessageValidator
 
     public bool Validate(SecureEnvelope envelope, string sessionKey)
     {
-        if (!_replayProtectionService.IsValid(envelope.ClientId, envelope.Nonce, envelope.Timestamp))
+        if (!_replayProtectionService.IsValid(envelope.Signature, envelope.Timestamp))
         {
             return false;
         }
 
-        string dataToVerify = $"{envelope.Payload}:{envelope.Timestamp}:{envelope.Nonce}:{envelope.ClientId}";
+        string dataToVerify = $"{envelope.Payload}:{envelope.Timestamp:O}";
         return _signatureService.Verify(dataToVerify, envelope.Signature, sessionKey);
     }
 }

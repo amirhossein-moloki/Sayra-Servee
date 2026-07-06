@@ -19,6 +19,15 @@
     <ProjectReference Include="..\Sayra.Server.Monitoring\Sayra.Server.Monitoring.csproj" />
     <ProjectReference Include="..\Sayra.Server.ProductionHardening\Sayra.Server.ProductionHardening.csproj" />
     <ProjectReference Include="..\Sayra.Server.Observability\Sayra.Server.Observability.csproj" />
+    <ProjectReference Include="..\Sayra.Server.Authentication\Sayra.Server.Authentication.csproj" />
+    <ProjectReference Include="..\Sayra.Server.Billing\Sayra.Server.Billing.csproj" />
+    <ProjectReference Include="..\Sayra.Server.Licensing\Sayra.Server.Licensing.csproj" />
+    <ProjectReference Include="..\Sayra.Server.Configuration\Sayra.Server.Configuration.csproj" />
+    <ProjectReference Include="..\Sayra.Server.UpdateSystem\Sayra.Server.UpdateSystem.csproj" />
+    <ProjectReference Include="..\Sayra.Server.Session\Sayra.Server.Session.csproj" />
+    <ProjectReference Include="..\Sayra.Server.Security\Sayra.Server.Security.csproj" />
+    <ProjectReference Include="..\Sayra.Server.EventBus\Sayra.Server.EventBus.csproj" />
+    <ProjectReference Include="..\Sayra.Server.Shared\Sayra.Server.Shared.csproj" />
   </ItemGroup>
 
 </Project>
