@@ -1,0 +1,314 @@
+:root {
+    --color-bg: #101014;
+    --color-primary: #f4f46b;
+    --color-primary2: #ffff3d;
+    --color-white: #ffffff;
+    --color-white2: #9A9A9A;
+    --color-secondary: #1F1F23;
+    --color-border: #252528;
+    --color-primary50: rgba(244, 244, 107, 0.17); /* #2cf4f46b roughly */
+    --color-dark50: rgba(16, 16, 20, 0.54); /* #8a101014 roughly */
+    --color-red: #F46B6B;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--color-bg);
+    color: var(--color-white);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    direction: rtl;
+    overflow-x: hidden;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 1280px;
+    margin: 0 auto;
+}
+
+/* Header */
+.header {
+    height: 90px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 24px;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--color-primary);
+}
+
+.pc-status {
+    margin-right: 40px;
+    display: flex;
+    align-items: center;
+}
+
+.pc-name {
+    font-size: 18px;
+    margin-left: 10px;
+}
+
+.status-badge {
+    background-color: var(--color-primary50);
+    border: 1px solid var(--color-primary2);
+    color: var(--color-primary2);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+}
+
+.date-time {
+    text-align: left;
+    margin-left: 60px;
+}
+
+.time {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.date {
+    font-size: 12px;
+    color: var(--color-white2);
+}
+
+.power-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+/* Main Layout */
+.main-layout {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.main-content {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+}
+
+/* Hero Timer */
+.hero-timer {
+    height: 200px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.hero-bg {
+    font-size: 150px;
+    font-weight: bold;
+    color: var(--color-white);
+    opacity: 0.05;
+    position: absolute;
+}
+
+.timer-container {
+    position: relative;
+    text-align: center;
+}
+
+.timer-text {
+    font-family: 'Black Ops One', cursive;
+    font-size: 70px;
+}
+
+.info-cards {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.info-card {
+    background-color: var(--color-secondary);
+    border-radius: 16px;
+    height: 53px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    margin-left: 20px;
+}
+
+.info-card:last-child {
+    margin-left: 0;
+}
+
+.icon {
+    width: 24px;
+    height: 24px;
+    background-color: var(--color-primary);
+    border-radius: 50%;
+    margin-left: 10px;
+}
+
+.card-text {
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+}
+
+.card-text .label {
+    font-size: 10px;
+    color: var(--color-white2);
+}
+
+.card-text .value {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* Search Area */
+.search-area {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.search-box {
+    width: 400px;
+    height: 40px;
+    background-color: var(--color-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    color: var(--color-white);
+    padding: 0 10px;
+}
+
+.section-title {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+/* Games Grid */
+.games-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.game-card {
+    width: 240px;
+    height: 276px;
+    border-radius: 20px;
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    overflow: hidden;
+}
+
+.card-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--color-dark50);
+}
+
+.card-content {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    padding: 18px;
+}
+
+.game-name {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.game-category {
+    font-size: 12px;
+    color: var(--color-white2);
+    margin: 4px 0 12px 0;
+}
+
+.play-btn {
+    width: 100%;
+    height: 31px;
+    background-color: var(--color-primary);
+    color: var(--color-bg);
+    border: none;
+    border-radius: 15px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.play-btn.unavailable {
+    opacity: 0.6;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 320px;
+    border-right: 1px solid var(--color-border);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.sidebar-header {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.separator {
+    border: none;
+    height: 1px;
+    background-color: var(--color-border);
+    margin-bottom: 15px;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.dot {
+    width: 20px;
+    height: 20px;
+    background-color: var(--color-white2);
+    border-radius: 50%;
+    margin-left: 10px;
+}
+
+.end-session-btn {
+    height: 50px;
+    background-color: var(--color-secondary);
+    color: var(--color-red);
+    border: 1px solid #353535;
+    border-radius: 12px;
+    font-weight: bold;
+    cursor: pointer;
+}

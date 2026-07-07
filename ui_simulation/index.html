@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAYRA Dashboard Simulation</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&display=swap" rel="stylesheet">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <div class="logo">SAYRA</div>
+                <div class="pc-status">
+                    <span class="pc-name">PC-08</span>
+                    <span class="status-badge">Connected</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="date-time">
+                    <div class="time">14:30</div>
+                    <div class="date">2023/10/27</div>
+                </div>
+                <button class="power-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M12,2V12M12,2A10,10 0 1,1 2,12A10,10 0 0,1 12,2" fill="none" stroke="#F46B6B" stroke-width="2"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <div class="main-layout">
+            <!-- Main Content -->
+            <main class="main-content">
+                <div class="hero-timer">
+                    <div class="hero-bg">SAYRA</div>
+                    <div class="timer-container">
+                        <div class="timer-text">00:45:12</div>
+                        <div class="info-cards">
+                            <div class="info-card">
+                                <div class="icon money-icon"></div>
+                                <div class="card-text">
+                                    <span class="label">هزینه تلفن</span>
+                                    <span class="value">110,000 تومان</span>
+                                </div>
+                            </div>
+                            <div class="info-card">
+                                <div class="icon wallet-icon"></div>
+                                <div class="card-text">
+                                    <span class="label">موجودی کیف</span>
+                                    <span class="value">120,000 تومان</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="search-area">
+                    <input type="text" class="search-box" placeholder="نام بازی را جستجو کنید...">
+                    <h2 class="section-title">بخش بازی ها</h2>
+                </div>
+
+                <div class="games-grid">
+                    <div class="game-card" style="background-image: url('https://placehold.co/240x276/252528/ffffff?text=Counter-Strike+2');">
+                        <div class="card-overlay"></div>
+                        <div class="card-content">
+                            <h3 class="game-name">Counter-Strike 2</h3>
+                            <p class="game-category">Shooter</p>
+                            <button class="play-btn">اجرا</button>
+                        </div>
+                    </div>
+                    <div class="game-card" style="background-image: url('https://placehold.co/240x276/252528/ffffff?text=Dota+2');">
+                        <div class="card-overlay"></div>
+                        <div class="card-content">
+                            <h3 class="game-name">Dota 2</h3>
+                            <p class="game-category">MOBA</p>
+                            <button class="play-btn">ادامه</button>
+                        </div>
+                    </div>
+                    <div class="game-card" style="background-image: url('https://placehold.co/240x276/252528/ffffff?text=Cyberpunk+2077');">
+                        <div class="card-overlay"></div>
+                        <div class="card-content">
+                            <h3 class="game-name">Cyberpunk 2077</h3>
+                            <p class="game-category">RPG</p>
+                            <button class="play-btn unavailable">ناموجود</button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="system-details">
+                    <h3 class="sidebar-header">System Detail</h3>
+                    <hr class="separator">
+                    <div class="detail-item">
+                        <div class="dot"></div>
+                        <span>i7 13500f</span>
+                    </div>
+                    <hr class="separator">
+                    <div class="detail-item">
+                        <div class="dot"></div>
+                        <span>RTX 4090</span>
+                    </div>
+                    <hr class="separator">
+                    <div class="detail-item">
+                        <div class="dot"></div>
+                        <span>32GB</span>
+                    </div>
+                    <hr class="separator">
+                    <div class="detail-item">
+                        <div class="dot"></div>
+                        <span>4k Oled</span>
+                    </div>
+                </div>
+                <button class="end-session-btn">پایان دادن به استفاده</button>
+            </aside>
+        </div>
+    </div>
+</body>
+</html>
