@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAYRA Dashboard Simulation</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Top Navigation -->
+        <header class="top-nav">
+            <div class="nav-left">
+                <h1 class="logo">SAYRA</h1>
+                <div class="divider"></div>
+                <div class="pc-info">
+                    <span class="pc-name">PC-08</span>
+                    <div class="status-badge">
+                        <span class="status-dot"></span>
+                        <span class="status-text">Connected</span>
+                    </div>
+                </div>
+            </div>
+            <div class="nav-right">
+                <div class="date-time">
+                    <div class="time" id="current-time">14:30</div>
+                    <div class="date" id="current-date">2023/10/27</div>
+                </div>
+                <button class="power-btn">
+                    <svg viewBox="0 0 24 24" width="24" height="24"><path d="M12,2V12M12,2A10,10 0 1,1 2,12A10,10 0 0,1 12,2" fill="none" stroke="currentColor" stroke-width="2.5"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <div class="main-layout">
+            <!-- Main Content -->
+            <main class="content-area">
+                <section class="hero-section">
+                    <div class="hero-bg-text">SAYRA</div>
+                    <div class="hero-content">
+                        <div class="timer" id="session-timer">02:45:12</div>
+                        <div class="info-cards">
+                            <div class="glass-card">
+                                <span class="card-label">هزینه جلسه</span>
+                                <span class="card-value accent">۱۱۰,۰۰۰ تومان</span>
+                            </div>
+                            <div class="glass-card">
+                                <span class="card-label">موجودی</span>
+                                <span class="card-value">۱۲۰,۰۰۰ تومان</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="games-section">
+                    <div class="section-header">
+                        <h2>بازی‌های نصب شده</h2>
+                        <div class="search-box">
+                            <input type="text" placeholder="جستجوی بازی...">
+                        </div>
+                    </div>
+                    <div class="game-grid">
+                        <!-- Game Card 1 -->
+                        <div class="game-card selected">
+                            <div class="game-cover" style="background-image: url('https://shared.fastly.steamstatic.com/store_apps/730/header.jpg');"></div>
+                            <div class="game-details">
+                                <h3 class="game-title">Counter-Strike 2</h3>
+                                <span class="game-category">Shooter</span>
+                                <button class="play-btn">اجرا</button>
+                            </div>
+                        </div>
+                        <!-- Game Card 2 -->
+                        <div class="game-card">
+                            <div class="game-cover" style="background-image: url('https://shared.fastly.steamstatic.com/store_apps/570/header.jpg');"></div>
+                            <div class="game-details">
+                                <h3 class="game-title">Dota 2</h3>
+                                <span class="game-category">MOBA</span>
+                                <button class="play-btn continue">ادامه</button>
+                            </div>
+                        </div>
+                        <!-- Game Card 3 -->
+                        <div class="game-card unavailable">
+                            <div class="game-cover" style="background-image: url('https://shared.fastly.steamstatic.com/store_apps/1091500/header.jpg');"></div>
+                            <div class="game-details">
+                                <h3 class="game-title">Cyberpunk 2077</h3>
+                                <span class="game-category">RPG</span>
+                                <button class="play-btn disabled" disabled>ناموجود</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+
+            <!-- Right Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-content">
+                    <h3>مشخصات سیستم</h3>
+                    <div class="spec-card">
+                        <span class="spec-label">CPU</span>
+                        <span class="spec-value">Intel Core i7-13500F</span>
+                    </div>
+                    <div class="spec-card">
+                        <span class="spec-label">GPU</span>
+                        <span class="spec-value">NVIDIA RTX 4090</span>
+                    </div>
+                    <div class="spec-card">
+                        <span class="spec-label">RAM</span>
+                        <span class="spec-value">32GB DDR5 6000MHz</span>
+                    </div>
+                    <div class="spec-card">
+                        <span class="spec-label">Display</span>
+                        <span class="spec-value">4K OLED 144Hz</span>
+                    </div>
+                </div>
+                <button class="end-session-btn">پایان دادن به استفاده</button>
+            </aside>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
