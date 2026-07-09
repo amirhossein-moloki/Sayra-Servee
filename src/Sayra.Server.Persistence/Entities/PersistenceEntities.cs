@@ -65,3 +65,14 @@ public class AdminUserEntity
     public string PasswordHash { get; set; } = string.Empty;
     public string Role { get; set; } = string.Empty;
 }
+
+public class ServerIdentityEntity
+{
+    [Key]
+    public string Id { get; set; } = string.Empty;
+    public string ServerName { get; set; } = string.Empty;
+    public string PrivateKey { get; set; } = string.Empty;
+    public string PublicKey { get; set; } = string.Empty;
+    public string PublicKeyFingerprint { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; }
+}

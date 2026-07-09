@@ -18,6 +18,7 @@ public class SayraDbContext : DbContext
     public DbSet<CommandAuditEntity> CommandAudits => Set<CommandAuditEntity>();
     public DbSet<TelemetryEntity> Telemetries => Set<TelemetryEntity>();
     public DbSet<AdminUserEntity> AdminUsers => Set<AdminUserEntity>();
+    public DbSet<ServerIdentityEntity> ServerIdentities => Set<ServerIdentityEntity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
