@@ -28,6 +28,7 @@
     <ProjectReference Include="..\Sayra.Server.Authentication\Sayra.Server.Authentication.csproj" />
     <ProjectReference Include="..\Sayra.Server.ProductionHardening\Sayra.Server.ProductionHardening.csproj" />
     <ProjectReference Include="..\Sayra.Server.Deployment\Sayra.Server.Deployment.csproj" />
+    <ProjectReference Include="..\Sayra.Server.Discovery\Sayra.Server.Discovery.csproj" />
   </ItemGroup>
 
   <ItemGroup>

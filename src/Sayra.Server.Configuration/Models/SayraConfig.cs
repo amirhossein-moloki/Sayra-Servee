@@ -9,6 +9,8 @@ public class SayraConfig
     public SecurityConfig Security { get; set; } = new();
     public ScalingConfig Scaling { get; set; } = new();
     public BackupConfig Backup { get; set; } = new();
+    public DiscoveryConfig Discovery { get; set; } = new();
+    public NetworkConfig Network { get; set; } = new();
 }
 
 public class HeartbeatConfig
@@ -41,4 +43,19 @@ public class BackupConfig
     public int BackupIntervalHours { get; set; } = 24;
     public string BackupPath { get; set; } = "./backups";
     public int RetentionDays { get; set; } = 7;
+}
+
+public class DiscoveryConfig
+{
+    public bool Enabled { get; set; } = true;
+    public int UdpPort { get; set; } = 37020;
+    public bool BroadcastEnabled { get; set; } = true;
+    public string ServerName { get; set; } = "Sayra Server";
+    public int Priority { get; set; } = 1;
+}
+
+public class NetworkConfig
+{
+    public int TcpPort { get; set; } = 5000;
+    public int ApiPort { get; set; } = 7000;
 }

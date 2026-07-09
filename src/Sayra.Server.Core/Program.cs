@@ -26,6 +26,7 @@ using Sayra.Server.ProductionHardening.CircuitBreaker;
 using Sayra.Server.Configuration;
 using Sayra.Server.Configuration.Models;
 using Sayra.Server.Deployment;
+using Sayra.Server.Discovery.Services;
 using Sayra.Server.UpdateSystem.Services;
 using Sayra.Server.UpdateSystem.Workflow;
 using Sayra.Server.Scaling;
@@ -180,6 +181,22 @@ public class Program
                 services.AddSingleton<CommandAuthorizer>();
                 services.AddSingleton<ISecureMessageDispatcher, SecureMessageDispatcher>();
                 services.AddSingleton<IMessageRouter, MessageRouter>();
+
+                // Discovery
+                services.AddSingleton<IServerIdentityService, ServerIdentityService>();
+                services.AddHostedService<DiscoveryListenerService>(sp =>
+                {
+                    var config = sp.GetRequiredService<IOptions<SayraConfig>>().Value;
+                    var tcpPort = config.Network.TcpPort;
+                    var apiPort = config.Network.ApiPort;
+
+                    return new DiscoveryListenerService(
+                        sp.GetRequiredService<ILogger<DiscoveryListenerService>>(),
+                        sp.GetRequiredService<IServerIdentityService>(),
+                        sp.GetRequiredService<IReplayProtectionService>(),
+                        sp.GetRequiredService<IOptions<SayraConfig>>(),
+                        tcpPort, apiPort);
+                });
 
                 // Initialize Event Handlers
                 services.AddHostedService<EventHandlerInitializer>();
