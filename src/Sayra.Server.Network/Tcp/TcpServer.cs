@@ -16,6 +16,7 @@ public class TcpServer
     private readonly ISignatureService _signatureService;
     private readonly IEncryptionService _encryptionService;
     private readonly Sayra.Server.Session.ISessionManager _sessionManager;
+    private readonly ITcpConnectionRegistry _connectionRegistry;
     private readonly int _port;
     private Socket? _listener;
 
@@ -27,6 +28,7 @@ public class TcpServer
         ISignatureService signatureService,
         IEncryptionService encryptionService,
         Sayra.Server.Session.ISessionManager sessionManager,
+        ITcpConnectionRegistry connectionRegistry,
         int port = 5000)
     {
         _logger = logger;
@@ -36,6 +38,7 @@ public class TcpServer
         _signatureService = signatureService;
         _encryptionService = encryptionService;
         _sessionManager = sessionManager;
+        _connectionRegistry = connectionRegistry;
         _port = port;
     }
 
@@ -81,7 +84,8 @@ public class TcpServer
             _secureMessageValidator,
             _signatureService,
             _encryptionService,
-            _sessionManager);
+            _sessionManager,
+            _connectionRegistry);
         await connection.ProcessAsync();
     }
 }

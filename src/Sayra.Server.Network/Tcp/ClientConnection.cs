@@ -21,6 +21,7 @@ public class ClientConnection
     private readonly ISignatureService _signatureService;
     private readonly IEncryptionService _encryptionService;
     private readonly Sayra.Server.Session.ISessionManager _sessionManager;
+    private readonly ITcpConnectionRegistry _connectionRegistry;
     private readonly CancellationTokenSource _cts = new();
 
     private bool _isAuthenticated = false;
@@ -37,7 +38,8 @@ public class ClientConnection
         ISecureMessageValidator secureMessageValidator,
         ISignatureService signatureService,
         IEncryptionService encryptionService,
-        Sayra.Server.Session.ISessionManager sessionManager)
+        Sayra.Server.Session.ISessionManager sessionManager,
+        ITcpConnectionRegistry connectionRegistry)
     {
         _socket = socket;
         _logger = logger;
@@ -47,6 +49,7 @@ public class ClientConnection
         _signatureService = signatureService;
         _encryptionService = encryptionService;
         _sessionManager = sessionManager;
+        _connectionRegistry = connectionRegistry;
     }
 
     public async Task ProcessAsync()
@@ -56,6 +59,10 @@ public class ClientConnection
         var reading = ReadPipeAsync(pipe.Reader);
 
         await Task.WhenAll(reading, writing);
+        if (_clientId != null)
+        {
+            _connectionRegistry.Unregister(_clientId);
+        }
         _logger.LogInformation("Connection closed for {EndPoint}", RemoteEndPoint);
     }
 
@@ -163,6 +170,7 @@ public class ClientConnection
                     _isAuthenticated = true;
                     _sessionKey = sessionKey;
                     _sessionManager.CreateSession(_clientId!, _sessionKey);
+                    _connectionRegistry.Register(_clientId!, this);
                     var sessionData = _sessionManager.GetSession(_clientId!);
                     await SendMessageAsync(new AuthStatusMessage
                     {
@@ -216,7 +224,7 @@ public class ClientConnection
         }
     }
 
-    private async Task SendMessageAsync<T>(T message)
+    public async Task SendMessageAsync<T>(T message)
     {
         string json;
         if (_isAuthenticated && _sessionKey != null)
@@ -260,6 +268,10 @@ public class ClientConnection
     public void Disconnect()
     {
         _cts.Cancel();
+        if (_clientId != null)
+        {
+            _connectionRegistry.Unregister(_clientId);
+        }
         try
         {
             _socket.Shutdown(SocketShutdown.Both);
