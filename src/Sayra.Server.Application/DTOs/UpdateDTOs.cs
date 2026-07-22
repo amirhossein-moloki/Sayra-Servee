@@ -5,5 +5,7 @@ public record UpdateManifest(
     string? ReleaseNotes,
     string PackageUrl,
     string Checksum,
-    string? Signature
+    string? Signature,
+    bool IsCritical,
+    DateTime ReleaseDate
 );

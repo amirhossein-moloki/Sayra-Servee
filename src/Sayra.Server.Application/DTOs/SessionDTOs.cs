@@ -1,19 +1,21 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Sayra.Server.Application.DTOs;
 
 public record SessionResponse(
-    string SessionId,
-    string PcId,
-    string SiteId,
-    DateTime StartTime,
+    [Required] string SessionId,
+    [Required] string PcId,
+    [Required] string SiteId,
+    [Required] DateTime StartTime,
     DateTime? EndTime,
-    string Status,
-    double Duration,
-    decimal CurrentCost,
-    decimal RatePerHour
+    [Required] string Status,
+    [Required] double Duration,
+    [Required] decimal CurrentCost,
+    [Required] decimal RatePerHour
 );
 
 public record StartSessionRequest(
-    string PcId,
+    [Required(ErrorMessage = "pcId is required")] string PcId,
     string? PricePlanId,
     string? UserId
 );

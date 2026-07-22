@@ -19,6 +19,9 @@ using Sayra.Server.EventBus;
 using Sayra.Server.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using Sayra.Server.AdminAPI.Authentication;
+using Microsoft.AspNetCore.Mvc;
+using Sayra.Server.Application.DTOs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,10 +30,28 @@ LogConfiguration.ConfigureSerilog("AdminAPI");
 builder.Host.UseSerilog();
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            var errors = context.ModelState.Values
+                .SelectMany(v => v.Errors)
+                .Select(e => e.ErrorMessage)
+                .ToList();
+            var errorMsg = "Validation failed: " + string.Join("; ", errors);
+            var details = string.Join(", ", errors);
+            return new BadRequestObjectResult(new ErrorResponse("BAD_REQUEST", errorMsg, details));
+        };
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
+
+// Phase 3: Bearer Authentication
+builder.Services.AddAuthentication("Bearer")
+    .AddScheme<BearerAuthOptions, BearerAuthHandler>("Bearer", null);
+builder.Services.AddAuthorization();
 
 // Database configuration
 builder.Services.AddDbContext<SayraDbContext>(options =>
@@ -89,6 +110,9 @@ app.UseHttpsRedirection();
 
 // Phase 4: Production Hardening
 app.UseMiddleware<RateLimitingMiddleware>();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<AdminHub>("/hubs/admin");
