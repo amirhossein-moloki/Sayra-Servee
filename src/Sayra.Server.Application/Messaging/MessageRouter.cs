@@ -71,6 +71,18 @@ public class MessageRouter : IMessageRouter
                 case "COMMAND":
                     await _dispatcher.DispatchAsync(baseMessage);
                     break;
+                case "TELEMETRY_REPORT":
+                    await HandleTelemetryReport(rawMessage);
+                    break;
+                case "PROCESS_LAUNCHED":
+                    await HandleProcessLaunched(rawMessage);
+                    break;
+                case "PROCESS_EXITED":
+                    await HandleProcessExited(rawMessage);
+                    break;
+                case "EXECUTION_RESULT":
+                    await HandleExecutionResult(rawMessage);
+                    break;
                 case "AUTHENTICATIONSTARTED":
                     await HandleAuthenticationStarted(rawMessage);
                     break;
@@ -401,17 +413,20 @@ public class MessageRouter : IMessageRouter
         var msg = JsonSerializer.Deserialize<ClientConnectedMessage>(raw, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         if (msg == null) return;
 
+        string pcId = !string.IsNullOrEmpty(msg.ClientId) ? msg.ClientId : msg.PcId;
+        string ip = !string.IsNullOrEmpty(msg.IPAddress) ? msg.IPAddress : "Unknown";
+
         var client = new Client
         {
-            Id = msg.ClientId,
-            IPAddress = msg.IPAddress,
+            Id = pcId,
+            IPAddress = ip,
             Status = ClientStatus.Online,
             LastHeartbeat = DateTime.UtcNow
         };
         _clientRegistry.AddOrUpdate(client);
-        _logger.LogInformation("Client connected: {ClientId} from {IPAddress}", msg.ClientId, msg.IPAddress);
+        _logger.LogInformation("Client connected: {ClientId} from {IPAddress}", pcId, ip);
 
-        _ = _eventPublisher.PublishAsync(new ClientConnectedEvent(msg.ClientId, msg.IPAddress));
+        _ = _eventPublisher.PublishAsync(new ClientConnectedEvent(pcId, ip));
     }
 
     private void HandleClientDisconnected(string raw)
@@ -426,5 +441,66 @@ public class MessageRouter : IMessageRouter
             _clientRegistry.AddOrUpdate(client);
         }
         _logger.LogInformation("Client disconnected: {ClientId}. Reason: {Reason}", msg.ClientId, msg.Reason);
+    }
+
+    private async Task HandleTelemetryReport(string raw)
+    {
+        var msg = JsonSerializer.Deserialize<TelemetryReportMessage>(raw, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        if (msg == null) return;
+
+        // Perform validation as required by Phase 6
+        if (msg.Cpu < 0 || msg.Cpu > 100 || msg.Ram < 0 || msg.Uptime < 0)
+        {
+            _logger.LogWarning("Rejecting invalid TELEMETRY_REPORT from {ClientId}", msg.ClientId);
+            return;
+        }
+
+        await _eventPublisher.PublishAsync(new TelemetryReceivedEvent(msg.ClientId, (float)msg.Cpu, (float)msg.Ram, msg.Uptime));
+    }
+
+    private async Task HandleProcessLaunched(string raw)
+    {
+        var msg = JsonSerializer.Deserialize<ProcessLaunchedMessage>(raw, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        if (msg == null) return;
+
+        // Validation
+        if (msg.Pid <= 0 || string.IsNullOrEmpty(msg.GameId))
+        {
+            _logger.LogWarning("Rejecting invalid PROCESS_LAUNCHED from {ClientId}", msg.ClientId);
+            return;
+        }
+
+        await _eventPublisher.PublishAsync(new GameStartedEvent(msg.ClientId, msg.Pid, msg.GameId, msg.GameId));
+    }
+
+    private async Task HandleProcessExited(string raw)
+    {
+        var msg = JsonSerializer.Deserialize<ProcessExitedMessage>(raw, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        if (msg == null) return;
+
+        // Validation
+        if (msg.DurationSeconds < 0 || string.IsNullOrEmpty(msg.GameId))
+        {
+            _logger.LogWarning("Rejecting invalid PROCESS_EXITED from {ClientId}", msg.ClientId);
+            return;
+        }
+
+        var durationSpan = TimeSpan.FromSeconds(msg.DurationSeconds);
+        await _eventPublisher.PublishAsync(new GameExitedEvent(msg.ClientId, msg.GameId, msg.GameId, msg.ExitCode, durationSpan.ToString()));
+    }
+
+    private async Task HandleExecutionResult(string raw)
+    {
+        var msg = JsonSerializer.Deserialize<ExecutionResultMessage>(raw, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        if (msg == null) return;
+
+        // Validation
+        if (string.IsNullOrEmpty(msg.CommandId) || string.IsNullOrEmpty(msg.PcId) || string.IsNullOrEmpty(msg.Action))
+        {
+            _logger.LogWarning("Rejecting invalid EXECUTION_RESULT from {ClientId}", msg.ClientId);
+            return;
+        }
+
+        await _eventPublisher.PublishAsync(new CommandExecutedEvent(msg.CommandId, msg.PcId, msg.Action, msg.Result));
     }
 }

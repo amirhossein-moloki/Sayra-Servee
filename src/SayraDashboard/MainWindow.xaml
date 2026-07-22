@@ -23,7 +23,7 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <Grid x:Name="Header" Grid.Row="0" Grid.ColumnSpan="2" Padding="24,0">
+        <Grid x:Name="Header" Grid.Row="0" Grid.ColumnSpan="2" Margin="24,0">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                 <TextBlock x:Name="Logo" Text="SAYRA" Style="{StaticResource HeaderLogoStyle}" />
                 <StackPanel x:Name="PcStatus" Orientation="Horizontal" Margin="40,0,0,0" VerticalAlignment="Center">
@@ -103,7 +103,7 @@
                                 </Border.Background>
                                 <Grid>
                                     <Border CornerRadius="20" Background="{StaticResource Dark50Brush}" VerticalAlignment="Stretch" />
-                                    <StackPanel VerticalAlignment="Bottom" Padding="18">
+                                    <StackPanel VerticalAlignment="Bottom" Margin="18">
                                         <TextBlock Text="{Binding Name}" Style="{StaticResource GameNameStyle}" />
                                         <TextBlock Text="{Binding Category}" Style="{StaticResource GameCategoryStyle}" Margin="0,4,0,12" />
                                         <Button x:Name="GameActionBtn" Content="{Binding ButtonText}" Height="31" Style="{StaticResource PlayButtonStyle}"
