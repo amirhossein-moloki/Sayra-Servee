@@ -12,6 +12,7 @@ public interface ISessionManager
     bool IsSessionActive(string clientId);
     void PauseSession(string clientId);
     void ResumeSession(string clientId);
+    string? GetClientIdBySessionId(string sessionId);
 }
 
 public class SessionManager : ISessionManager
@@ -69,5 +70,10 @@ public class SessionManager : ISessionManager
     public void ResumeSession(string clientId)
     {
         _sessionRegistry.UpdateState(clientId, SessionState.Active);
+    }
+
+    public string? GetClientIdBySessionId(string sessionId)
+    {
+        return _sessionRegistry.GetClientIdBySessionId(sessionId);
     }
 }

@@ -116,6 +116,8 @@ public class Program
 
                 // Infrastructure
                 services.AddSingleton<IClientRegistry, InMemoryClientRegistry>();
+                services.AddSingleton<ITcpConnectionRegistry, Sayra.Server.Network.Tcp.TcpConnectionRegistry>();
+                services.AddSingleton<Sayra.Server.Network.Tcp.TcpNotificationEventHandler>();
 
                 // Repositories
                 services.AddScoped<IClientRepository, ClientRepository>();
@@ -221,6 +223,7 @@ public class Program
                         sp.GetRequiredService<ISignatureService>(),
                         sp.GetRequiredService<IEncryptionService>(),
                         sp.GetRequiredService<ISessionManager>(),
+                        sp.GetRequiredService<ITcpConnectionRegistry>(),
                         5000));
 
                 // Hosted Services

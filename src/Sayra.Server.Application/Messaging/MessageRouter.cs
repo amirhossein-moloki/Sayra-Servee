@@ -71,6 +71,39 @@ public class MessageRouter : IMessageRouter
                 case "COMMAND":
                     await _dispatcher.DispatchAsync(baseMessage);
                     break;
+                case "AUTHENTICATIONSTARTED":
+                    await HandleAuthenticationStarted(rawMessage);
+                    break;
+                case "AUTHENTICATIONSUCCEEDED":
+                    await HandleAuthenticationSucceeded(rawMessage);
+                    break;
+                case "AUTHENTICATIONFAILED":
+                    await HandleAuthenticationFailed(rawMessage);
+                    break;
+                case "LOGOUTSTARTED":
+                    await HandleLogoutStarted(rawMessage);
+                    break;
+                case "LOGOUTCOMPLETED":
+                    await HandleLogoutCompleted(rawMessage);
+                    break;
+                case "SESSIONEXPIRED":
+                    await HandleSessionExpired(rawMessage);
+                    break;
+                case "GAMELAUNCHING":
+                    await HandleGameLaunching(rawMessage);
+                    break;
+                case "GAMESTARTED":
+                    await HandleGameStarted(rawMessage);
+                    break;
+                case "GAMEEXITED":
+                    await HandleGameExited(rawMessage);
+                    break;
+                case "GAMECRASHED":
+                    await HandleGameCrashed(rawMessage);
+                    break;
+                case "LAUNCHFAILED":
+                    await HandleLaunchFailed(rawMessage);
+                    break;
                 default:
                     _logger.LogWarning("Unknown message type: {MessageType}", baseMessage.Type);
                     break;
@@ -82,6 +115,261 @@ public class MessageRouter : IMessageRouter
         }
 
         await Task.CompletedTask;
+    }
+
+    private async Task HandleAuthenticationStarted(string raw)
+    {
+        var msg = JsonSerializer.Deserialize<AuthenticationStartedMessage>(raw, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        if (msg == null) return;
+
+        string ts = msg.Timestamp?.ToString() ?? string.Empty;
+
+        // Validation
+        if (string.IsNullOrEmpty(msg.Username))
+        {
+            _logger.LogWarning("Rejecting AuthenticationStarted: missing username");
+            return;
+        }
+        if (string.IsNullOrEmpty(ts) || !DateTime.TryParse(ts, out _))
+        {
+            _logger.LogWarning("Rejecting AuthenticationStarted: missing or invalid timestamp");
+            return;
+        }
+
+        await _eventPublisher.PublishAsync(new AuthenticationStartedEvent(msg.ClientId, msg.Username, ts));
+    }
+
+    private async Task HandleAuthenticationSucceeded(string raw)
+    {
+        var msg = JsonSerializer.Deserialize<AuthenticationSucceededMessage>(raw, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        if (msg == null) return;
+
+        string ts = msg.Timestamp?.ToString() ?? string.Empty;
+
+        // Validation
+        if (msg.User == null)
+        {
+            _logger.LogWarning("Rejecting AuthenticationSucceeded: missing user");
+            return;
+        }
+        if (string.IsNullOrEmpty(msg.User.Id) || string.IsNullOrEmpty(msg.User.Username) ||
+            string.IsNullOrEmpty(msg.User.DisplayName) || string.IsNullOrEmpty(msg.User.Role))
+        {
+            _logger.LogWarning("Rejecting AuthenticationSucceeded: missing user details");
+            return;
+        }
+        var role = msg.User.Role.ToLower();
+        if (role != "player" && role != "admin" && role != "operator")
+        {
+            _logger.LogWarning("Rejecting AuthenticationSucceeded: invalid user role {Role}", msg.User.Role);
+            return;
+        }
+        var authType = msg.AuthenticationType;
+        if (authType != "LocalAdmin" && authType != "ServerReservation" && authType != "Offline" && authType != "Cached" && authType != "Server")
+        {
+            _logger.LogWarning("Rejecting AuthenticationSucceeded: invalid auth type {Type}", authType);
+            return;
+        }
+        if (string.IsNullOrEmpty(msg.SessionId))
+        {
+            _logger.LogWarning("Rejecting AuthenticationSucceeded: missing sessionId");
+            return;
+        }
+        if (string.IsNullOrEmpty(ts) || !DateTime.TryParse(ts, out _))
+        {
+            _logger.LogWarning("Rejecting AuthenticationSucceeded: missing or invalid timestamp");
+            return;
+        }
+
+        var eventUser = new Sayra.Server.EventBus.Events.EventUserDto
+        {
+            Id = msg.User.Id,
+            Username = msg.User.Username,
+            DisplayName = msg.User.DisplayName,
+            Role = msg.User.Role,
+            Permissions = msg.User.Permissions,
+            Avatar = msg.User.Avatar,
+            LastLogin = msg.User.LastLogin,
+            PreferredLanguage = msg.User.PreferredLanguage,
+            PreferredTheme = msg.User.PreferredTheme,
+            StationId = msg.User.StationId
+        };
+
+        await _eventPublisher.PublishAsync(new AuthenticationSucceededEvent(msg.ClientId, eventUser, msg.AuthenticationType, msg.SessionId, ts));
+    }
+
+    private async Task HandleAuthenticationFailed(string raw)
+    {
+        var msg = JsonSerializer.Deserialize<AuthenticationFailedMessage>(raw, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        if (msg == null) return;
+
+        string ts = msg.Timestamp?.ToString() ?? string.Empty;
+
+        // Validation
+        if (string.IsNullOrEmpty(msg.Username) || string.IsNullOrEmpty(msg.Reason))
+        {
+            _logger.LogWarning("Rejecting AuthenticationFailed: missing fields");
+            return;
+        }
+        if (string.IsNullOrEmpty(ts) || !DateTime.TryParse(ts, out _))
+        {
+            _logger.LogWarning("Rejecting AuthenticationFailed: missing or invalid timestamp");
+            return;
+        }
+
+        await _eventPublisher.PublishAsync(new AuthenticationFailedEvent(msg.ClientId, msg.Username, msg.Reason, ts));
+    }
+
+    private async Task HandleLogoutStarted(string raw)
+    {
+        var msg = JsonSerializer.Deserialize<LogoutStartedMessage>(raw, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        if (msg == null) return;
+
+        string ts = msg.Timestamp?.ToString() ?? string.Empty;
+
+        // Validation
+        if (msg.User == null || string.IsNullOrEmpty(msg.User.Username) || string.IsNullOrEmpty(msg.User.Role))
+        {
+            _logger.LogWarning("Rejecting LogoutStarted: missing user info");
+            return;
+        }
+        if (string.IsNullOrEmpty(ts) || !DateTime.TryParse(ts, out _))
+        {
+            _logger.LogWarning("Rejecting LogoutStarted: missing or invalid timestamp");
+            return;
+        }
+
+        var logoutUser = new Sayra.Server.EventBus.Events.LogoutUserDto
+        {
+            Username = msg.User.Username,
+            Role = msg.User.Role
+        };
+
+        await _eventPublisher.PublishAsync(new LogoutStartedEvent(msg.ClientId, logoutUser, ts));
+    }
+
+    private async Task HandleLogoutCompleted(string raw)
+    {
+        var msg = JsonSerializer.Deserialize<LogoutCompletedMessage>(raw, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        if (msg == null) return;
+
+        string ts = msg.Timestamp?.ToString() ?? string.Empty;
+
+        // Validation
+        if (string.IsNullOrEmpty(ts) || !DateTime.TryParse(ts, out _))
+        {
+            _logger.LogWarning("Rejecting LogoutCompleted: missing or invalid timestamp");
+            return;
+        }
+
+        await _eventPublisher.PublishAsync(new LogoutCompletedEvent(msg.ClientId, msg.Username, ts));
+    }
+
+    private async Task HandleSessionExpired(string raw)
+    {
+        var msg = JsonSerializer.Deserialize<SessionExpiredMessage>(raw, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        if (msg == null) return;
+
+        string ts = msg.Timestamp?.ToString() ?? string.Empty;
+
+        // Validation
+        if (string.IsNullOrEmpty(msg.SessionId))
+        {
+            _logger.LogWarning("Rejecting SessionExpired: missing sessionId");
+            return;
+        }
+        if (string.IsNullOrEmpty(ts) || !DateTime.TryParse(ts, out _))
+        {
+            _logger.LogWarning("Rejecting SessionExpired: missing or invalid timestamp");
+            return;
+        }
+
+        await _eventPublisher.PublishAsync(new SessionExpiredEvent(msg.ClientId, msg.SessionId, msg.Username, ts));
+    }
+
+    private async Task HandleGameLaunching(string raw)
+    {
+        var msg = JsonSerializer.Deserialize<GameLaunchingMessage>(raw, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        if (msg == null) return;
+
+        // Validation
+        if (string.IsNullOrEmpty(msg.GameId) || string.IsNullOrEmpty(msg.Name))
+        {
+            _logger.LogWarning("Rejecting GameLaunching: missing game details");
+            return;
+        }
+
+        await _eventPublisher.PublishAsync(new GameLaunchingEvent(msg.ClientId, msg.GameId, msg.Name));
+    }
+
+    private async Task HandleGameStarted(string raw)
+    {
+        var msg = JsonSerializer.Deserialize<GameStartedMessage>(raw, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        if (msg == null) return;
+
+        // Validation
+        if (msg.Pid <= 0)
+        {
+            _logger.LogWarning("Rejecting GameStarted: invalid pid {Pid}", msg.Pid);
+            return;
+        }
+        if (string.IsNullOrEmpty(msg.GameId) || string.IsNullOrEmpty(msg.Name))
+        {
+            _logger.LogWarning("Rejecting GameStarted: missing game details");
+            return;
+        }
+
+        await _eventPublisher.PublishAsync(new GameStartedEvent(msg.ClientId, msg.Pid, msg.GameId, msg.Name));
+    }
+
+    private async Task HandleGameExited(string raw)
+    {
+        var msg = JsonSerializer.Deserialize<GameExitedMessage>(raw, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        if (msg == null) return;
+
+        // Validation
+        if (string.IsNullOrEmpty(msg.GameId) || string.IsNullOrEmpty(msg.Name))
+        {
+            _logger.LogWarning("Rejecting GameExited: missing game details");
+            return;
+        }
+        if (string.IsNullOrEmpty(msg.Duration) || !TimeSpan.TryParse(msg.Duration, out _))
+        {
+            _logger.LogWarning("Rejecting GameExited: missing or invalid duration");
+            return;
+        }
+
+        await _eventPublisher.PublishAsync(new GameExitedEvent(msg.ClientId, msg.GameId, msg.Name, msg.ExitCode, msg.Duration));
+    }
+
+    private async Task HandleGameCrashed(string raw)
+    {
+        var msg = JsonSerializer.Deserialize<GameCrashedMessage>(raw, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        if (msg == null) return;
+
+        // Validation
+        if (string.IsNullOrEmpty(msg.GameId) || string.IsNullOrEmpty(msg.Name) || string.IsNullOrEmpty(msg.Reason))
+        {
+            _logger.LogWarning("Rejecting GameCrashed: missing game details or crash reason");
+            return;
+        }
+
+        await _eventPublisher.PublishAsync(new GameCrashedEvent(msg.ClientId, msg.GameId, msg.Name, msg.ExitCode, msg.Reason));
+    }
+
+    private async Task HandleLaunchFailed(string raw)
+    {
+        var msg = JsonSerializer.Deserialize<LaunchFailedMessage>(raw, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        if (msg == null) return;
+
+        // Validation
+        if (string.IsNullOrEmpty(msg.GameId) || string.IsNullOrEmpty(msg.Name) || string.IsNullOrEmpty(msg.Reason))
+        {
+            _logger.LogWarning("Rejecting LaunchFailed: missing game details or failure reason");
+            return;
+        }
+
+        await _eventPublisher.PublishAsync(new LaunchFailedEvent(msg.ClientId, msg.GameId, msg.Name, msg.Reason));
     }
 
     private void HandleHeartbeat(string raw)

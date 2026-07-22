@@ -25,6 +25,24 @@ public class MonitoringEventHandler
         subscriber.Subscribe<SessionEndedEvent>(HandleSessionEnded);
         subscriber.Subscribe<TelemetryReceivedEvent>(HandleTelemetry);
         subscriber.Subscribe<CommandExecutedEvent>(HandleCommand);
+
+        // Subscriptions to contract events for monitoring
+        subscriber.Subscribe<GameCrashedEvent>(HandleGameCrashed);
+        subscriber.Subscribe<LaunchFailedEvent>(HandleLaunchFailed);
+    }
+
+    private Task HandleGameCrashed(GameCrashedEvent @event, CancellationToken ct)
+    {
+        _metricsService.RecordCommand(false); // record as failed operational metric
+        _alertService.ProcessMetric("GameCrash", 100f, @event.ClientId); // trigger crash alert
+        return Task.CompletedTask;
+    }
+
+    private Task HandleLaunchFailed(LaunchFailedEvent @event, CancellationToken ct)
+    {
+        _metricsService.RecordCommand(false);
+        _alertService.ProcessMetric("LaunchFailure", 100f, @event.ClientId);
+        return Task.CompletedTask;
     }
 
     private Task HandleClientConnected(ClientConnectedEvent @event, CancellationToken ct)

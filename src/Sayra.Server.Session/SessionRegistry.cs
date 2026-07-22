@@ -10,6 +10,7 @@ public interface ISessionRegistry
     void Remove(string clientId);
     void UpdateState(string clientId, SessionState state);
     SessionState GetState(string clientId);
+    string? GetClientIdBySessionId(string sessionId);
 }
 
 public class SessionRegistry : ISessionRegistry
@@ -50,5 +51,17 @@ public class SessionRegistry : ISessionRegistry
             return data.state;
         }
         return SessionState.Idle;
+    }
+
+    public string? GetClientIdBySessionId(string sessionId)
+    {
+        foreach (var pair in _sessions)
+        {
+            if (pair.Value.session.Id == sessionId)
+            {
+                return pair.Key;
+            }
+        }
+        return null;
     }
 }

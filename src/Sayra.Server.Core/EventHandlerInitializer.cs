@@ -17,6 +17,7 @@ public class EventHandlerInitializer : IHostedService
     {
         // Resolve PersistenceEventHandlers to trigger its constructor and subscription logic
         _serviceProvider.GetService<PersistenceEventHandlers>();
+        _serviceProvider.GetService<Sayra.Server.Network.Tcp.TcpNotificationEventHandler>();
         return Task.CompletedTask;
     }
 
