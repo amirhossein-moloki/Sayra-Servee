@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -6,6 +6,10 @@
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.4" />
@@ -21,6 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Sayra.Server.AdminAPI\Sayra.Server.AdminAPI.csproj" />
     <ProjectReference Include="..\..\src\Sayra.Server.Authentication\Sayra.Server.Authentication.csproj" />
     <ProjectReference Include="..\..\src\Sayra.Server.Security\Sayra.Server.Security.csproj" />
     <ProjectReference Include="..\..\src\Sayra.Server.Shared\Sayra.Server.Shared.csproj" />
@@ -29,6 +34,12 @@
     <ProjectReference Include="..\..\src\Sayra.Server.Monitoring\Sayra.Server.Monitoring.csproj" />
     <ProjectReference Include="..\..\src\Sayra.Server.EventBus\Sayra.Server.EventBus.csproj" />
     <ProjectReference Include="..\..\src\Sayra.Server.ProductionHardening\Sayra.Server.ProductionHardening.csproj" />
+    <ProjectReference Include="..\..\src\Sayra.Server.Billing\Sayra.Server.Billing.csproj" />
+    <ProjectReference Include="..\..\src\Sayra.Server.Licensing\Sayra.Server.Licensing.csproj" />
+    <ProjectReference Include="..\..\src\Sayra.Server.Configuration\Sayra.Server.Configuration.csproj" />
+    <ProjectReference Include="..\..\src\Sayra.Server.UpdateSystem\Sayra.Server.UpdateSystem.csproj" />
+    <ProjectReference Include="..\..\src\Sayra.Server.Persistence\Sayra.Server.Persistence.csproj" />
+    <ProjectReference Include="..\..\src\Sayra.Server.Session\Sayra.Server.Session.csproj" />
   </ItemGroup>
 
 </Project>
