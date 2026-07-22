@@ -85,13 +85,15 @@
         <Setter Property="Foreground" Value="{StaticResource ColorBg}" />
         <Setter Property="FontWeight" Value="Bold" />
         <Setter Property="BorderThickness" Value="0" />
-        <Template>
-            <ControlTemplate TargetType="Button">
-                <Border Background="{TemplateBinding Background}" CornerRadius="15">
-                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                </Border>
-            </ControlTemplate>
-        </Template>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}" CornerRadius="15">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <Style x:Key="SidebarHeaderStyle" TargetType="TextBlock">
@@ -105,13 +107,15 @@
         <Setter Property="Foreground" Value="{StaticResource RedBrush}" />
         <Setter Property="BorderBrush" Value="#353535" />
         <Setter Property="BorderThickness" Value="1" />
-        <Template>
-            <ControlTemplate TargetType="Button">
-                <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="12">
-                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                </Border>
-            </ControlTemplate>
-        </Template>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="12">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
 </ResourceDictionary>
